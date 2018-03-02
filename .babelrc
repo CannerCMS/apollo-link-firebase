@@ -1,0 +1,11 @@
+{
+  "presets": [
+    "react",
+    "flow",
+    "stage-0"
+  ],
+  "plugins": [
+    "transform-decorators-legacy",
+    "transform-flow-strip-types"
+  ]
+}
