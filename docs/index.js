@@ -6,6 +6,7 @@ const {Header, Content, Footer} = Layout;
 import 'antd/dist/antd.css';
 import Profile from "./containers/ProfileContainer";
 import TodoList from "./containers/TodoListContainer";
+import AddTodo from "./containers/AddTodo";
 import {ApolloProvider} from 'react-apollo';
 import client from "./apolloClient";
 
@@ -18,6 +19,7 @@ class Example extends Component<{}> {
       <Content style={{padding: '0 50px'}}>
         <div style={{background: '#fff', padding: 24, minHeight: 280}}>
           <Profile />
+          <AddTodo />
           <TodoList />
         </div>
       </Content>
