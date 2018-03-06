@@ -16,7 +16,26 @@
     "graphql",
     "firebase"
   ],
+  "scripts": {
+    "lint": "eslint src test docs",
+    "clean": "rimraf lib dist",
+    "build:flow": "flow-copy-source -v -i '**/test/**' src lib",
+    "build:commonjs": "cross-env BABEL_ENV=commonjs babel src --out-dir lib",
+    "build": "npm run build:commonjs && npm run build:flow",
+    "prepublish": "npm run clean && npm run check:src && npm run build",
+    "check:src": "npm run lint",
+    "test": "cross-env BABEL_ENV=test karma start --single-run",
+    "test:watch": "cross-env BABEL_ENV=test karma start",
+    "start": "./node_modules/.bin/webpack-dev-server --config webpack.config.dev.js --mode development",
+    "build:docs": "./node_modules/.bin/webpack --config webpack.config.prod.js --mode production",
+    "postpublish": "npm run build:docs",
+    "validate": "npm ls"
+  },
   "devDependencies": {
+    "antd": "^3.2.3",
+    "apollo-cache-inmemory": "^1.1.9",
+    "apollo-client": "^2.2.5",
+    "apollo-link": "^1.2.1",
     "babel-cli": "^6.14.0",
     "babel-core": "^6.14.0",
     "babel-eslint": "^6.1.2",
@@ -52,21 +71,6 @@
     "webpack": "^4.0.1",
     "webpack-cli": "^2.0.10",
     "webpack-dev-server": "^3.1.0"
-  },
-  "scripts": {
-    "lint": "eslint src test docs",
-    "clean": "rimraf lib dist",
-    "build:flow": "flow-copy-source -v -i '**/test/**' src lib",
-    "build:commonjs": "cross-env BABEL_ENV=commonjs babel src --out-dir lib",
-    "build": "npm run build:commonjs && npm run build:flow",
-    "prepublish": "npm run clean && npm run check:src && npm run build",
-    "check:src": "npm run lint",
-    "test": "cross-env BABEL_ENV=test karma start --single-run",
-    "test:watch": "cross-env BABEL_ENV=test karma start",
-    "start": "./node_modules/.bin/webpack-dev-server --config webpack.config.dev.js --mode development",
-    "build:docs": "./node_modules/.bin/webpack --config webpack.config.prod.js --mode production",
-    "postpublish": "npm run build:docs",
-    "validate": "npm ls"
   },
   "pre-commit": [
     "lint"

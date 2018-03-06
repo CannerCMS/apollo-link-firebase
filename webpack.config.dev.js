@@ -1,38 +1,25 @@
 const path = require('path');
 
 module.exports = {
-  entry: './docs/index.js',
+  entry: {
+    index: './docs/index.js'
+  },
+  devServer: {
+    contentBase: path.join(__dirname, "docs")
+  },
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: 'bundle.js',
-    publicPath: '/static/'
-  },
-  resolve: {
-    extensions: ['.js']
-  },
-  resolveLoader: {
-    moduleExtensions: ["-loader"]
+    filename: '[name].js',
+    publicPath: '/docs/static/'
   },
   module: {
     rules: [
       {
         test: /\.js$/,
-        use: 'babel',
-        exclude: path.resolve(__dirname, "node_modules")
-      },
-      {
-        test: /\.css$/,
-        use: [
-          {
-            loader: 'style-loader'
-          },
-          {
-            loader: 'css-loader',
-            options: {
-              modules: true
-            }
-          }
-        ]
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader'
+        }
       }
     ]
   }
