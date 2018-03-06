@@ -4,8 +4,10 @@ import ReactDOM from 'react-dom';
 import {Layout} from 'antd';
 const {Header, Content, Footer} = Layout;
 import 'antd/dist/antd.css';
-import Profile from "./components/Profile";
-import TodoList from "./components/TodoList";
+import Profile from "./containers/ProfileContainer";
+import TodoList from "./containers/TodoListContainer";
+import {ApolloProvider} from 'react-apollo';
+import client from "./apolloClient";
 
 class Example extends Component<{}> {
   render() {
@@ -15,13 +17,8 @@ class Example extends Component<{}> {
       </Header>
       <Content style={{padding: '0 50px'}}>
         <div style={{background: '#fff', padding: 24, minHeight: 280}}>
-          <Profile
-            name="wwwy3y3"
-            description="this is description"
-            thumb="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-            cover="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"
-          />
-          <TodoList todos={[{content: "123"}]} />
+          <Profile />
+          <TodoList />
         </div>
       </Content>
       <Footer style={{textAlign: 'center'}}>
@@ -32,5 +29,7 @@ class Example extends Component<{}> {
 }
 
 ReactDOM.render(
-  <Example/>
+  <ApolloProvider client={client}>
+    <Example/>
+  </ApolloProvider>
 , (document.getElementById('root'): any));

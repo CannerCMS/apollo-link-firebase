@@ -23,8 +23,8 @@ const typeDefs = `
   }
 
   type Mutation {
-    addTodo(content: string): Todo
-    updateProfile(name: string, cover: string, thumb: string, description: string): Profile
+    addTodo(content: String): Todo
+    updateProfile(name: String, cover: String, thumb: String, description: String): Profile
   }
 `;
 
@@ -33,22 +33,22 @@ const todos = [];
 let nextTodoId = 0;
 let profile = {
   name: "wwwy3y3",
-  cover: "https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png",
-  thumb: "https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png",
+  cover: "https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png",
+  thumb: "https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png",
   description: "this is description"
 };
 
 // mocks
 const mocks = {
-  Query: {
+  Query: () => ({
     todos() {
       return todos;
     },
     profile() {
       return profile;
     }
-  },
-  Mutation: {
+  }),
+  Mutation: () => ({
     addTodo: (_, {content}) => {
       const id = ++nextTodoId;
       const todo = {
@@ -62,7 +62,7 @@ const mocks = {
       profile = Object.assign({}, profile, {name, cover, thumb, description});
       return profile;
     }
-  }
+  })
 };
 
 const schema = makeExecutableSchema({typeDefs});
