@@ -5,6 +5,7 @@ import {Layout} from 'antd';
 const {Header, Content, Footer} = Layout;
 import 'antd/dist/antd.css';
 import Profile from "./components/Profile";
+import TodoList from "./components/TodoList";
 
 class Example extends Component<{}> {
   render() {
@@ -20,6 +21,7 @@ class Example extends Component<{}> {
             thumb="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
             cover="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"
           />
+          <TodoList todos={[{content: "123"}]} />
         </div>
       </Content>
       <Footer style={{textAlign: 'center'}}>
