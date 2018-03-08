@@ -1,30 +1,20 @@
 module.exports = {
   extends: [
-    "google",
-    "plugin:react/recommended"
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:flowtype/recommended"
   ],
-  parser: "babel-eslint",
-  parserOptions: {
-    ecmaVersion: 7,
-    sourceType: "module",
-    ecmaFeatures: {
-      jsx: true
-    }
-  },
+  plugins: ["react", "flowtype", "jest"],
   env: {
-    browser: true
-  },
-  plugins: [
-    "react"
-  ],
-  settings: {
-    react: {
-      pragma: "React",  // Pragma to use, default to "React"
-      version: "15.3.1"
-    }
+    browser: true,
+    jest: true,
+    node: true,
+    es6: true
   },
   rules: {
-    "new-cap": [2, {capIsNewExceptions: ["CSSModules", "Dimensions"]}],
-    "react/prop-types": 0
-  }
+    "max-len": 0,
+    "react/prop-types": 0,
+    "no-implicit-coercion": 0
+  },
+  parser: "babel-eslint"
 };
