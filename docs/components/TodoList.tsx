@@ -1,8 +1,7 @@
-// @flow
 import React, {Component} from "react";
 import {List} from 'antd';
 
-type Props = {
+export interface Props {
   todos: Array<{
     content: string
   }>

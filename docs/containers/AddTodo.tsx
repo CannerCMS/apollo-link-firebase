@@ -1,4 +1,3 @@
-// @flow
 import gql from 'graphql-tag';
 import {graphql} from 'react-apollo';
 import TodoForm from '../components/TodoForm';
@@ -28,7 +27,7 @@ export default graphql(addTodo, {
         variables: {content},
         update: (proxy, {data: {addTodo}}) => {
           // Read the data from our cache for this query.
-          const data = proxy.readQuery({query: getTodos});
+          const data: {todos: any[]} = proxy.readQuery({query: getTodos});
 
           // Add our todo from the mutation to the end.
           data.todos.push(addTodo);

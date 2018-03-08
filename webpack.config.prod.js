@@ -1,28 +1,25 @@
 const path = require('path');
 
 module.exports = {
-  entry: './docs/index.js',
+  entry: {
+    index: './docs/index.tsx'
+  },
+  devServer: {
+    contentBase: path.join(__dirname, "docs")
+  },
   output: {
-    path: path.join(__dirname, 'docs/static'),
-    filename: 'bundle.js',
-    libraryTarget: 'var'
-  },
-  externals: {
-    'react': "React",
-    'react-dom': "ReactDOM"
-  },
-  resolve: {
-    extensions: ['.js']
-  },
-  resolveLoader: {
-    moduleExtensions: ["-loader"]
+    path: path.join(__dirname, 'dist'),
+    filename: '[name].js',
+    publicPath: '/docs/static/'
   },
   module: {
     rules: [
       {
-        test: /\.js$/,
-        use: 'babel',
-        exclude: path.resolve(__dirname, "node_modules")
+        test: /\.tsx?$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'ts-loader'
+        }
       },
       {
         test: /\.css$/,
@@ -31,10 +28,7 @@ module.exports = {
             loader: 'style-loader'
           },
           {
-            loader: 'css-loader',
-            options: {
-              modules: true
-            }
+            loader: 'css-loader'
           }
         ]
       }

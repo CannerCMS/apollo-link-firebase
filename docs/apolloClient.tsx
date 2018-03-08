@@ -1,8 +1,9 @@
-// @flow
 import {ApolloClient} from "apollo-client";
 import {InMemoryCache} from "apollo-cache-inmemory";
 import {SchemaLink} from "apollo-link-schema";
 import {makeExecutableSchema, addMockFunctionsToSchema} from 'graphql-tools';
+import {ApolloLink} from "apollo-link";
+import RtdbLink from "../src/rtdbLink";
 
 const typeDefs = `
   type Todo {
@@ -75,5 +76,7 @@ const apolloCache = new InMemoryCache();
 
 export default new ApolloClient({
   cache: apolloCache,
-  link: new SchemaLink({schema})
+  link: ApolloLink.from([new RtdbLink({
+    database: "test"
+  }), new SchemaLink({schema})])
 });

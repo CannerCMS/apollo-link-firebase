@@ -1,9 +1,8 @@
-// @flow
 import React, {Component} from "react";
 import {Card, Icon, Avatar} from 'antd';
 const {Meta} = Card;
 
-type Props = {
+export interface Props {
   name?: string,
   cover?: string,
   thumb?: string,

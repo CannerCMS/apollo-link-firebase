@@ -1,0 +1,4 @@
+{
+  "exclude": ["node_modules", "lib"],
+  "extends": ["tslint-react"]
+}

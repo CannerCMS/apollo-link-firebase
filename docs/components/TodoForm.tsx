@@ -1,9 +1,8 @@
-// @flow
 import React, {Component} from "react";
 import {Form, Input, Button} from 'antd';
 const FormItem = Form.Item;
 
-type Props = {
+export interface Props {
   addTodo: ({content: string}) => Promise<any>,
   form: any
 };
