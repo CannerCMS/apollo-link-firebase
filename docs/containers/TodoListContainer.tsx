@@ -4,8 +4,8 @@ import TodoList from '../components/TodoList';
 
 const TODOS_QUERY = gql`
   query GetTodos {
-    todos {
-      id
+    todos @rtdbQuery(ref: "x/y/z", orderByChild: "id", limitToFirst: true) {
+      id @rtdbKey
       content
     }
   }

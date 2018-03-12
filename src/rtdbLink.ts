@@ -1,5 +1,20 @@
-import {hasDirectives} from 'apollo-utilities';
 import {ApolloLink, Observable, FetchResult, Operation, NextLink} from 'apollo-link';
+import { graphql, ExecInfo } from 'graphql-anywhere/lib/async';
+import { Resolver } from 'graphql-anywhere';
+import {
+  hasDirectives,
+  addTypenameToDocument
+} from 'apollo-utilities';
+
+const resolver: Resolver = async (
+  fieldName: string,
+  root: any,
+  args: any,
+  context: any,
+  info: ExecInfo,
+) => {
+  console.log(info);
+};
 
 export default class RtdbLink extends ApolloLink {
   database: any;
@@ -15,9 +30,24 @@ export default class RtdbLink extends ApolloLink {
       return forward(operation);
     }
 
-    if (!forward)
-      throw new Error("no next link");
+    const queryWithTypename = addTypenameToDocument(operation.query);
 
-    return forward(operation);
+    return new Observable(observer => {
+      graphql(
+        resolver,
+        queryWithTypename
+      )
+      .then(data => {
+        observer.next({ data });
+        observer.complete();
+      })
+      .catch(err => {
+        if (err.name === 'AbortError') return;
+        if (err.result && err.result.errors) {
+          observer.next(err.result);
+        }
+        observer.error(err);
+      });
+    });
   }
 }

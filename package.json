@@ -37,6 +37,7 @@
     "apollo-utilities": "^1.0.9",
     "css-loader": "^0.28.10",
     "graphql": "0.13.0",
+    "graphql-anywhere": "^4.1.6",
     "graphql-tag": "^2.8.0",
     "graphql-tools": "^2.21.0",
     "react": "^16.2.0",
