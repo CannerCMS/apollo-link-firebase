@@ -13,7 +13,7 @@ const PROFILE_QUERY = gql`
   }
 `;
 
-const withProfile = graphql(PROFILE_QUERY, {
+const withProfile = graphql<{profile: any}>(PROFILE_QUERY, {
   props: ({data}) => {
     if (data.loading || data.error) {
       return {name: "", cover: "", thumb: "", description: ""};

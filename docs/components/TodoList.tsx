@@ -1,4 +1,5 @@
 import React, {Component} from "react";
+import { ChildProps } from 'react-apollo';
 import {List} from 'antd';
 
 export interface Props {
@@ -7,7 +8,7 @@ export interface Props {
   }>
 };
 
-export default class Profile extends Component<Props> {
+export default class Profile extends Component<ChildProps<Props, any>> {
   render() {
     const {todos} = this.props;
     return <List

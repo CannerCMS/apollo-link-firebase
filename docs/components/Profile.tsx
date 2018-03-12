@@ -1,5 +1,6 @@
 import React, {Component} from "react";
 import {Card, Icon, Avatar} from 'antd';
+import { ChildProps } from 'react-apollo';
 const {Meta} = Card;
 
 export interface Props {
@@ -9,7 +10,7 @@ export interface Props {
   description?: string
 };
 
-export default class Profile extends Component<Props> {
+export default class Profile extends Component<ChildProps<Props, any>> {
   render() {
     const {name, cover, thumb, description} = this.props;
     return <Card

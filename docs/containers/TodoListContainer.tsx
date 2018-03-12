@@ -11,7 +11,7 @@ const TODOS_QUERY = gql`
   }
 `;
 
-const withTodos = graphql(TODOS_QUERY, {
+const withTodos = graphql<{todos: any[]}>(TODOS_QUERY, {
   props: ({data}) => {
     if (data.loading || data.error) {
       return {todos: []};

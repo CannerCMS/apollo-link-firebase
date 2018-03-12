@@ -1,5 +1,6 @@
 import React, {Component} from "react";
 import {Form, Input, Button} from 'antd';
+import { ChildProps } from 'react-apollo';
 const FormItem = Form.Item;
 
 export interface Props {
@@ -7,7 +8,7 @@ export interface Props {
   form: any
 };
 
-class TodoForm extends Component<Props> {
+class TodoForm extends Component<ChildProps<Props, any>> {
   handleSubmit = (e: any) => {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
