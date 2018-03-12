@@ -1,4 +1,3 @@
-// @flow
 import {hasDirectives} from 'apollo-utilities';
 import {ApolloLink, Observable, FetchResult, Operation, NextLink} from 'apollo-link';
 

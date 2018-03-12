@@ -7,6 +7,10 @@ module.exports = {
   devServer: {
     contentBase: path.join(__dirname, "docs")
   },
+  resolve: {
+    // Add `.ts` and `.tsx` as a resolvable extension.
+    extensions: [".ts", ".tsx", ".js"]
+  },
   output: {
     path: path.join(__dirname, 'dist'),
     filename: '[name].js',
