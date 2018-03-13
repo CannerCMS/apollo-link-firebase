@@ -13,7 +13,27 @@ const resolver: Resolver = async (
   context: any,
   info: ExecInfo,
 ) => {
+  console.log(fieldName);
+  console.log(root);
+  console.log(args);
+  console.log(context);
   console.log(info);
+  if (fieldName === "todos") {
+    return [{
+      id: 1,
+      __typename: "todos",
+      another: 1,
+      content: "123"
+    }, {
+      id: 2,
+      __typename: "todos",
+      another: 2,
+      content: "234"
+    }]
+  } else {
+    return root[fieldName];
+  }
+  
 };
 
 export default class RtdbLink extends ApolloLink {
@@ -24,14 +44,11 @@ export default class RtdbLink extends ApolloLink {
   }
 
   request(operation: Operation, forward?: NextLink): Observable<FetchResult> {
-    console.log(operation.query);
     const isRtdbQuery = hasDirectives(['rtdbQuery'], operation.query);
     if (!isRtdbQuery && forward) {
       return forward(operation);
     }
-
     const queryWithTypename = addTypenameToDocument(operation.query);
-
     return new Observable(observer => {
       graphql(
         resolver,
