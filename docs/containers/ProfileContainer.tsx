@@ -3,8 +3,8 @@ import {graphql} from 'react-apollo';
 import Profile from '../components/Profile';
 
 const PROFILE_QUERY = gql`
-  query GetProfile {
-    profile @rtdbQuery(ref: "profile") {
+  query GetProfile($ref: string) {
+    profile(ref: $ref) @rtdbQuery(ref: $ref) {
       name
       cover
       thumb
@@ -20,7 +20,8 @@ const withProfile = graphql<any, any>(PROFILE_QUERY, {
     }
 
     return data.profile;
-  }
+  },
+  options: {variables: {ref: "profile"}}
 });
 
 export default withProfile(Profile);

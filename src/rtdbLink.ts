@@ -80,8 +80,8 @@ const resolver: Resolver = async (
   const { directives, isLeaf, resultKey } = info;
   const { database } = context;
   const currentNode = (root || {})[resultKey] || null;
-  // leaf with @rtdbKey
 
+  // leaf with @rtdbKey
   if (isLeaf && has(directives, 'rtdbKey')) {
     return root.__snapshotKey;
   }
@@ -114,6 +114,7 @@ export default class RtdbLink extends ApolloLink {
     if (!isRtdbQuery && forward) {
       return forward(operation);
     }
+
     const queryWithTypename = addTypenameToDocument(operation.query);
     const context: ResolverContext = {
       database: this.database
@@ -124,7 +125,8 @@ export default class RtdbLink extends ApolloLink {
         resolver,
         queryWithTypename,
         null,
-        context
+        context,
+        operation.variables
       )
       .then(data => {
         observer.next({ data });
