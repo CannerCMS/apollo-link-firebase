@@ -34,8 +34,7 @@ const snapshotToArray = (snapshot: database.DataSnapshot, typename: string): any
   const ret = [];
   snapshot.forEach(childSnapshot => {
     ret.push({
-      ...childSnapshot.val(),
-      __snapshotKey: childSnapshot.key,
+      __snapshot: childSnapshot,
       __typename: typename
     });
     return false;
@@ -79,16 +78,23 @@ const resolver: Resolver = async (
 ) => {
   const { directives, isLeaf, resultKey } = info;
   const { database } = context;
-  const currentNode = (root || {})[resultKey] || null;
-
+  console.log(resultKey);
+  console.log(root);
   // leaf with @rtdbKey
   if (isLeaf && has(directives, 'rtdbKey')) {
-    return root.__snapshotKey;
+    return root.__snapshot.key;
   }
 
-  // leaf, or selectionSet without rtdbQuery directive
-  if (isLeaf || !has(directives, 'rtdbQuery')) {
-    return currentNode;
+  // selectionSet without rtdbQuery directive
+  if (!isLeaf && !has(directives, 'rtdbQuery')) {
+    return {
+      __snapshot: root.__snapshot.child(resultKey)
+    };
+  }
+
+  // leaf
+  if (isLeaf) {
+    return root.__snapshot.child(resultKey).val();
   }
 
   const query = createQuery({database, directives: directives.rtdbQuery});
@@ -97,8 +103,7 @@ const resolver: Resolver = async (
   const {type, as = "object"} = directives.rtdbQuery as RtdbDirectives;
   // parse snapshot as array or object
   return (as === "object") ? {
-    ...snapshot.val(),
-    __snapshotKey: snapshot.key,
+    __snapshot: snapshot,
     __typename: type
   } : snapshotToArray(snapshot, type);
 };
