@@ -8,7 +8,11 @@ const PROFILE_QUERY = gql`
       name
       cover
       thumb
-      description
+      description,
+      location {
+        city,
+        address
+      }
     }
   }
 `;

@@ -7,12 +7,16 @@ export interface Props {
   name?: string,
   cover?: string,
   thumb?: string,
-  description?: string
+  description?: string,
+  location?: {
+    city: string,
+    address: string
+  }
 };
 
 export default class Profile extends Component<ChildProps<Props, any>> {
   render() {
-    const {name, cover, thumb, description} = this.props;
+    const {name, cover, thumb, description, location = {} as any} = this.props;
     return <Card
       style={{width: 300}}
       cover={<img alt="example" src={cover} />}
@@ -21,7 +25,7 @@ export default class Profile extends Component<ChildProps<Props, any>> {
       <Meta
         avatar={<Avatar src={thumb} />}
         title= {name}
-        description= {description}
+        description= {`${description}, city: ${location.city}, address: ${location.address}`}
       />
     </Card>;
   }
