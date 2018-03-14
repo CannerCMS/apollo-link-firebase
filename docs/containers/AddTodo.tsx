@@ -20,7 +20,7 @@ const addTodo = gql`
   }
 `;
 
-export default graphql(addTodo, {
+export default graphql<any, any, any, any>(addTodo, {
   props: ({mutate}) => ({
     addTodo: ({content}: {content: string}) => {
       return mutate({

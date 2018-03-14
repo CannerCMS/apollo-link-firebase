@@ -303,15 +303,21 @@ apollo-cache@^1.1.5:
   dependencies:
     apollo-utilities "^1.0.9"
 
-apollo-client@^2.2.5:
-  version "2.2.6"
-  resolved "https://registry.yarnpkg.com/apollo-client/-/apollo-client-2.2.6.tgz#38b5a197976f3c22b63623c455d4c4606e420b66"
+apollo-cache@^1.1.6:
+  version "1.1.6"
+  resolved "https://registry.yarnpkg.com/apollo-cache/-/apollo-cache-1.1.6.tgz#b953488bcc8244e001b9ab9c8b362a1512e9203f"
+  dependencies:
+    apollo-utilities "^1.0.10"
+
+apollo-client@^2.2.7:
+  version "2.2.7"
+  resolved "https://registry.yarnpkg.com/apollo-client/-/apollo-client-2.2.7.tgz#d5adbda81ef1f1c9c105ac71227ca8dc42b5731b"
   dependencies:
     "@types/zen-observable" "^0.5.3"
-    apollo-cache "^1.1.5"
+    apollo-cache "^1.1.6"
     apollo-link "^1.0.0"
     apollo-link-dedup "^1.0.0"
-    apollo-utilities "^1.0.9"
+    apollo-utilities "^1.0.10"
     symbol-observable "^1.0.2"
     zen-observable "^0.7.0"
   optionalDependencies:
@@ -340,6 +346,10 @@ apollo-link@^1.0.0, apollo-link@^1.1.0, apollo-link@^1.2.1:
 apollo-utilities@^1.0.0, apollo-utilities@^1.0.1, apollo-utilities@^1.0.9:
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/apollo-utilities/-/apollo-utilities-1.0.9.tgz#16f9f2f92fd6c651d497aba6f2747ce17d87d80a"
+
+apollo-utilities@^1.0.10:
+  version "1.0.10"
+  resolved "https://registry.yarnpkg.com/apollo-utilities/-/apollo-utilities-1.0.10.tgz#0c35696891d4fa28d76768e0f7249d63c6da08b9"
 
 aproba@^1.0.3, aproba@^1.1.1:
   version "1.2.0"
@@ -3079,7 +3089,7 @@ hoek@2.x.x:
   version "2.16.3"
   resolved "https://registry.yarnpkg.com/hoek/-/hoek-2.16.3.tgz#20bb7403d3cea398e91dc4710a8ff1b8274a25ed"
 
-hoist-non-react-statics@^2.2.0, hoist-non-react-statics@^2.3.1:
+hoist-non-react-statics@^2.3.1:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-2.5.0.tgz#d2ca2dfc19c5a91c5a6615ce8e564ef0347e2a40"
 
@@ -3335,7 +3345,7 @@ into-stream@^3.1.0:
     from2 "^2.1.1"
     p-is-promise "^1.1.0"
 
-invariant@^2.2.1, invariant@^2.2.2:
+invariant@^2.2.2:
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/invariant/-/invariant-2.2.3.tgz#1a827dfde7dcbd7c323f0ca826be8fa7c5e9d688"
   dependencies:
@@ -3898,10 +3908,6 @@ lodash.debounce@^4.0.0, lodash.debounce@^4.0.8:
   version "4.0.8"
   resolved "https://registry.yarnpkg.com/lodash.debounce/-/lodash.debounce-4.0.8.tgz#82d79bff30a67c4005ffd5e2515300ad9ca4d7af"
 
-lodash.flowright@^3.5.0:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/lodash.flowright/-/lodash.flowright-3.5.0.tgz#2b5fff399716d7e7dc5724fe9349f67065184d67"
-
 lodash.isarguments@^3.0.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/lodash.isarguments/-/lodash.isarguments-3.1.0.tgz#2f573d85c6a24289ff00663b491c1d338ff3458a"
@@ -3922,10 +3928,6 @@ lodash.memoize@^4.1.2:
   version "4.1.2"
   resolved "https://registry.yarnpkg.com/lodash.memoize/-/lodash.memoize-4.1.2.tgz#bcc6c49a42a2840ed997f323eada5ecd182e0bfe"
 
-lodash.pick@^4.4.0:
-  version "4.4.0"
-  resolved "https://registry.yarnpkg.com/lodash.pick/-/lodash.pick-4.4.0.tgz#52f05610fff9ded422611441ed1fc123a03001b3"
-
 lodash.throttle@^4.0.0:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/lodash.throttle/-/lodash.throttle-4.1.1.tgz#c23e91b710242ac70c37f1e1cda9274cc39bf2f4"
@@ -3938,7 +3940,7 @@ lodash.uniqby@^4.7.0:
   version "4.7.0"
   resolved "https://registry.yarnpkg.com/lodash.uniqby/-/lodash.uniqby-4.7.0.tgz#d99c07a669e9e6d24e1362dfe266c67616af1302"
 
-lodash@^4.11.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.16.5, lodash@^4.17.2, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.3.0:
+lodash@4.17.5, lodash@^4.11.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.16.5, lodash@^4.17.2, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.3.0:
   version "4.17.5"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.5.tgz#99a92d65c0272debe8c96b6057bc8fbfa3bed511"
 
@@ -5577,16 +5579,15 @@ react-addons-test-utils@^15.3.1:
   version "15.6.2"
   resolved "https://registry.yarnpkg.com/react-addons-test-utils/-/react-addons-test-utils-15.6.2.tgz#c12b6efdc2247c10da7b8770d185080a7b047156"
 
-react-apollo@^2.0.4:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/react-apollo/-/react-apollo-2.0.4.tgz#01dd32a8e388672f5d7385b21cdd0b94009ee9ee"
+react-apollo@2.1.0-rc.1:
+  version "2.1.0-rc.1"
+  resolved "https://registry.yarnpkg.com/react-apollo/-/react-apollo-2.1.0-rc.1.tgz#2add0910ad730e0acdb6fe54aedf3303515b23a1"
   dependencies:
-    apollo-link "^1.0.0"
-    hoist-non-react-statics "^2.2.0"
-    invariant "^2.2.1"
-    lodash.flowright "^3.5.0"
-    lodash.pick "^4.4.0"
-    prop-types "^15.5.8"
+    fbjs "^0.8.16"
+    hoist-non-react-statics "^2.3.1"
+    invariant "^2.2.2"
+    lodash "4.17.5"
+    prop-types "^15.6.0"
 
 react-dom@^16.2.0:
   version "16.2.0"

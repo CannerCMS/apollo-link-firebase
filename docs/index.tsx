@@ -7,7 +7,7 @@ import Profile from "./containers/ProfileContainer";
 import TodoList from "./containers/TodoListContainer";
 import AddTodo from "./containers/AddTodo";
 import {ApolloProvider} from 'react-apollo';
-import client from "./apolloClient";
+import createClient from "./apolloClient";
 import * as firebase from "firebase";
 
 firebase.initializeApp({
@@ -73,7 +73,7 @@ class Example extends Component<{}, State> {
 }
 
 ReactDOM.render(
-  <ApolloProvider client={client}>
+  <ApolloProvider client={createClient(firebase.database())}>
     <Example/>
   </ApolloProvider>
 , document.getElementById('root'));

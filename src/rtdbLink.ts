@@ -5,6 +5,9 @@ import {
   hasDirectives,
   addTypenameToDocument
 } from 'apollo-utilities';
+import {
+  database
+} from "firebase"
 
 const resolver: Resolver = async (
   fieldName: string,
@@ -22,8 +25,7 @@ const resolver: Resolver = async (
     return [{
       id: 1,
       __typename: "todos",
-      another: 1,
-      content: "123"
+      another: 1
     }, {
       id: 2,
       __typename: "todos",
@@ -31,14 +33,14 @@ const resolver: Resolver = async (
       content: "234"
     }]
   } else {
-    return root[fieldName];
+    return root[fieldName] || null;
   }
   
 };
 
 export default class RtdbLink extends ApolloLink {
-  database: any;
-  constructor({database}: {database: any}) {
+  database: database.Database;
+  constructor({database}: {database: database.Database}) {
     super();
     this.database = database;
   }

@@ -74,9 +74,9 @@ addMockFunctionsToSchema({
 
 const apolloCache = new InMemoryCache();
 
-export default new ApolloClient({
+export default (database: any) => new ApolloClient({
   cache: apolloCache,
   link: ApolloLink.from([new RtdbLink({
-    database: "test"
+    database
   }), new SchemaLink({schema})])
 });

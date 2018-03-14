@@ -4,14 +4,14 @@ import TodoList from '../components/TodoList';
 
 const TODOS_QUERY = gql`
   query GetTodos {
-    todos @rtdbQuery(ref: "x/y/z", orderByChild: "id", limitToFirst: true) {
+    todos @rtdbQuery(ref: "x/y/z", orderByChild: "id", limitToFirst: true, type: "Todos") {
       id @rtdbKey
       content
     }
   }
 `;
 
-const withTodos = graphql<{todos: any[]}>(TODOS_QUERY, {
+const withTodos = graphql<any, any, any, any>(TODOS_QUERY, {
   props: ({data}) => {
     if (data.loading || data.error) {
       return {todos: []};
