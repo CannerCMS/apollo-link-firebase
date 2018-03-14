@@ -4,7 +4,7 @@ import Profile from '../components/Profile';
 
 const PROFILE_QUERY = gql`
   query GetProfile {
-    profile {
+    profile @rtdbQuery(ref: "profile") {
       name
       cover
       thumb
