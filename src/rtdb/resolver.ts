@@ -1,22 +1,19 @@
-import {ApolloLink, Observable, FetchResult, Operation, NextLink} from 'apollo-link';
 import { graphql, ExecInfo } from 'graphql-anywhere/lib/async';
-import { Resolver } from 'graphql-anywhere';
-import {
-  hasDirectives,
-  addTypenameToDocument
-} from 'apollo-utilities';
+import { Resolver, VariableMap } from 'graphql-anywhere';
+import { DocumentNode } from 'graphql';
 import {
   database
 } from "firebase";
-import isUndefined from "lodash/isUndefined";
-import has from "lodash/has";
-import isArray from "lodash/isArray";
+import * as isUndefined from "lodash/isUndefined";
+import * as has from "lodash/has";
+import * as isArray from "lodash/isArray";
 
-interface ResolverContext {
+
+export interface ResolverContext {
   database: database.Database
 }
 
-interface RtdbDirectives {
+export interface RtdbDirectives {
   ref: string,
   type: string,
   as?: string,
@@ -78,8 +75,7 @@ const resolver: Resolver = async (
 ) => {
   const { directives, isLeaf, resultKey } = info;
   const { database } = context;
-  console.log(resultKey);
-  console.log(root);
+
   // leaf with @rtdbKey
   if (isLeaf && has(directives, 'rtdbKey')) {
     return root.__snapshot.key;
@@ -108,44 +104,17 @@ const resolver: Resolver = async (
   } : snapshotToArray(snapshot, type);
 };
 
-export default class RtdbLink extends ApolloLink {
-  database: database.Database;
-  constructor({database}: {database: database.Database}) {
-    super();
-    this.database = database;
-  }
-
-  request(operation: Operation, forward?: NextLink): Observable<FetchResult> {
-    const isRtdbQuery = hasDirectives(['rtdbQuery'], operation.query);
-    if (!isRtdbQuery && forward) {
-      return forward(operation);
-    }
-
-    const queryWithTypename = addTypenameToDocument(operation.query);
-    const context: ResolverContext = {
-      database: this.database
-    };
-
-    return new Observable(observer => {
-      graphql(
-        resolver,
-        queryWithTypename,
-        null,
-        context,
-        operation.variables
-      )
-      .then(data => {
-        observer.next({ data });
-        observer.complete();
-      })
-      .catch(err => {
-        console.log(err);
-        if (err.name === 'AbortError') return;
-        if (err.result && err.result.errors) {
-          observer.next(err.result);
-        }
-        observer.error(err);
-      });
-    });
-  }
+export const resolve = (
+  query: DocumentNode,
+  rootValue?: any,
+  contextValue?: any,
+  variableValues?: VariableMap
+): Promise<any> => {
+  return graphql(
+    resolver,
+    query,
+    rootValue,
+    contextValue,
+    variableValues
+  );
 }

@@ -1,3 +1,5 @@
+// tslint:disable:jsx-no-multiline-js
+// tslint:disable:jsx-wrap-multiline
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 import {Layout, Button} from 'antd';

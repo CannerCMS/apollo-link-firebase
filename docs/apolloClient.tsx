@@ -1,6 +1,6 @@
 import {ApolloClient} from "apollo-client";
 import {InMemoryCache} from "apollo-cache-inmemory";
-import RtdbLink from "../src/rtdbLink";
+import RtdbLink from "../src/rtdb/link";
 
 const apolloCache = new InMemoryCache();
 
