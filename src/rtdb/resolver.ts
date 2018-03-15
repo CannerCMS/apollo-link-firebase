@@ -96,12 +96,15 @@ const resolver: Resolver = async (
   const query = createQuery({database, directives: directives.rtdbQuery});
   const snapshot: database.DataSnapshot = await query.once('value');
   
-  const {type, as = "object"} = directives.rtdbQuery as RtdbDirectives;
+  const {type} = directives.rtdbQuery as RtdbDirectives;
+  const toArray = has(directives, 'array');
   // parse snapshot as array or object
-  return (as === "object") ? {
-    __snapshot: snapshot,
-    __typename: type
-  } : snapshotToArray(snapshot, type);
+  return (toArray)
+    ? snapshotToArray(snapshot, type)
+    : {
+      __snapshot: snapshot,
+      __typename: type
+    };
 };
 
 export const resolve = (
