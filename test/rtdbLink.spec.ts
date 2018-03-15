@@ -107,5 +107,36 @@ describe('rtdbLink', () => {
       const result = await resolve(query, null, context, {ref: `${TEST_NAMESPACE}/articles`});
       expect(result.articles.length).to.be.equal(ARTICLE_LEN);
     });
+
+    it('should query array with orderByChild', async () => {
+      const query = gql`
+        query($ref: string) {
+          articles @rtdbQuery(ref: $ref, orderByChild: "count") @array {
+            id @rtdbKey
+            count,
+            title
+          }
+        }
+      `;
+
+      const result = await resolve(query, null, context, {ref: `${TEST_NAMESPACE}/articles`});
+      expect(result.articles[0].count < result.articles[1].count).to.be.true;
+    });
+
+    it('should query array with orderByChild & limitToFirst', async () => {
+      const query = gql`
+        query($ref: string) {
+          articles @rtdbQuery(ref: $ref, orderByChild: "count", limitToFirst: 2) @array {
+            id @rtdbKey
+            count,
+            title
+          }
+        }
+      `;
+
+      const result = await resolve(query, null, context, {ref: `${TEST_NAMESPACE}/articles`});
+      expect(result.articles[0].count < result.articles[1].count).to.be.true;
+      expect(result.articles.length).to.be.equal(2);
+    });
   });
 });
