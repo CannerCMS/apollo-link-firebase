@@ -43,6 +43,21 @@ const mockArticles = (len: number) => {
   return fn(len);
 }
 
+const mockReviews = (len: number) => {
+  const fn = compose(
+    reduce((result, obj) => Object.assign({[obj.id]: omit(obj, "id")}, result), {}),
+    times(((num: number) => {
+      return {
+        id: num,
+        articleId: "1",
+        content: faker.lorem.words(10)
+      };
+    }))
+  );
+
+  return fn(len);
+}
+
 describe('rtdbLink', () => {
   let defaultApp;
   let context;
@@ -59,13 +74,15 @@ describe('rtdbLink', () => {
     };
     const ARTICLE_LEN = 5;
     const articles = mockArticles(ARTICLE_LEN);
+    const reviews = mockReviews(3);
 
     before(async () => {
       // setup data
       defaultApp = await initialize();
-      context = {database: defaultApp.database()};
+      context = {database: defaultApp.database(), exportVal: {}};
       await defaultApp.database().ref(TEST_NAMESPACE).child('object').set(object);
       await defaultApp.database().ref(TEST_NAMESPACE).child('articles').set(articles);
+      await defaultApp.database().ref(TEST_NAMESPACE).child('reviews').set(reviews);
     });
 
     after(async () => {
@@ -205,6 +222,26 @@ describe('rtdbLink', () => {
       const dynamicCountsKeys = Object.keys(articles[0].dynamicCounts);
       expect(result.articles[0].dynamicCounts.length).to.be.equal(dynamicCountsKeys.length);
       expect(result.articles[0].dynamicCounts[0].count).to.be.eql(articles[0].dynamicCounts[dynamicCountsKeys[0]]);
+    });
+
+    it('should query relation data with root value', async () => {
+      const query = gql`
+        query($ref: string, $reviewRef: string) {
+          articles @rtdbQuery(ref: $ref) @array {
+            id @rtdbKey @export
+            count,
+            title,
+            reviews @rtdbQuery(ref: $reviewRef, orderByChild: "articleId", equalTo: "$export$id") @array {
+              id @rtdbKey
+              content
+            }
+          }
+        }
+      `;
+
+      const result = await resolve(query, null, context, {ref: `${TEST_NAMESPACE}/articles`, reviewRef: `${TEST_NAMESPACE}/reviews`});
+      expect(result.articles[0].reviews.length).to.be.equal(0);
+      expect(result.articles[1].reviews.length).to.be.equal(3);
     });
   });
 });

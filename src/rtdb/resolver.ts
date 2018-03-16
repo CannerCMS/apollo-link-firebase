@@ -7,10 +7,13 @@ import {
 import * as isUndefined from "lodash/isUndefined";
 import * as has from "lodash/has";
 import * as isArray from "lodash/isArray";
+import * as mapValues from "lodash/mapValues";
+import * as trimStart from "lodash/trimStart";
 
 
 export interface ResolverContext {
-  database: database.Database
+  database: database.Database,
+  exportVal: any
 }
 
 export interface RtdbDirectives {
@@ -39,8 +42,14 @@ const snapshotToArray = (snapshot: database.DataSnapshot, typename?: string): an
   return ret;
 }
 
-const createQuery = ({database, directives}: {database: database.Database, directives: RtdbDirectives}): database.Query => {
+const createQuery = ({database, directives, exportVal}: {database: database.Database, directives: RtdbDirectives, exportVal: any}): database.Query => {
   let query: database.Query | database.Reference = database.ref(directives.ref);
+  // relace $export$field
+  directives = mapValues(directives, val => {
+    return (val.startsWith && val.startsWith("$export$"))
+      ? exportVal[trimStart(val, "$export$")]
+      : val;
+  });
 
   // orderBy
   if (directives.orderByChild) {
@@ -74,15 +83,23 @@ const resolver: Resolver = async (
   info: ExecInfo,
 ) => {
   const { directives, isLeaf, resultKey } = info;
-  const { database } = context;
+  const { database, exportVal } = context;
 
-  // leaf with @rtdbKey
-  if (isLeaf && has(directives, 'rtdbKey')) {
-    return root.__snapshot.key;
-  }
+  if (isLeaf) {
+    let leafReturn: any = null;
+    if (has(directives, 'rtdbKey')) {
+      leafReturn = root.__snapshot.key;
+    } else if (has(directives, 'val')) {
+      leafReturn = root.__snapshot.val();
+    } else {
+      leafReturn = root.__snapshot.child(resultKey).val();
+    }
 
-  if (isLeaf && has(directives, 'val')) {
-    return root.__snapshot.val();
+    if (has(directives, 'export')) {
+      context.exportVal[resultKey] = leafReturn;
+    }
+
+    return leafReturn;
   }
 
   // selectionSet without rtdbQuery directive
@@ -97,12 +114,7 @@ const resolver: Resolver = async (
     };
   }
 
-  // leaf
-  if (isLeaf) {
-    return root.__snapshot.child(resultKey).val();
-  }
-
-  const query = createQuery({database, directives: directives.rtdbQuery});
+  const query = createQuery({database, directives: directives.rtdbQuery, exportVal});
   const snapshot: database.DataSnapshot = await query.once('value');
   
   const {type} = directives.rtdbQuery as RtdbDirectives;

@@ -23,7 +23,8 @@ export default class RtdbLink extends ApolloLink {
 
     const queryWithTypename = addTypenameToDocument(operation.query);
     const context: ResolverContext = {
-      database: this.database
+      database: this.database,
+      exportVal: {}
     };
 
     return new Observable(observer => {
