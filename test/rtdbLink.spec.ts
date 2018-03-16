@@ -21,6 +21,10 @@ const mockArticles = (len: number) => {
         nested: {
           nestedField: faker.lorem.words(10)
         },
+        dynamicCounts: {
+          id1: 1,
+          id2: 2
+        },
         comments: {
           1: {
             content: faker.lorem.words(10)
@@ -180,6 +184,27 @@ describe('rtdbLink', () => {
         id: "1",
         ...articles[0].comments[1]
       });
+    });
+
+    it('should query nested array with scalar value', async () => {
+      const query = gql`
+        query($ref: string) {
+          articles @rtdbQuery(ref: $ref) @array {
+            id @rtdbKey
+            count,
+            title,
+            dynamicCounts @array {
+              id @rtdbKey
+              count @val
+            }
+          }
+        }
+      `;
+
+      const result = await resolve(query, null, context, {ref: `${TEST_NAMESPACE}/articles`});
+      const dynamicCountsKeys = Object.keys(articles[0].dynamicCounts);
+      expect(result.articles[0].dynamicCounts.length).to.be.equal(dynamicCountsKeys.length);
+      expect(result.articles[0].dynamicCounts[0].count).to.be.eql(articles[0].dynamicCounts[dynamicCountsKeys[0]]);
     });
   });
 });

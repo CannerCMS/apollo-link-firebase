@@ -81,6 +81,10 @@ const resolver: Resolver = async (
     return root.__snapshot.key;
   }
 
+  if (isLeaf && has(directives, 'val')) {
+    return root.__snapshot.val();
+  }
+
   // selectionSet without rtdbQuery directive
   if (!isLeaf && !has(directives, 'rtdbQuery')) {
     if (has(directives, 'array')) {
