@@ -87,7 +87,7 @@ const resolver: Resolver = async (
 
   if (isLeaf) {
     let leafReturn: any = null;
-    if (has(directives, 'rtdbKey')) {
+    if (has(directives, 'key')) {
       leafReturn = root.__snapshot.key;
     } else if (has(directives, 'val')) {
       leafReturn = root.__snapshot.val();

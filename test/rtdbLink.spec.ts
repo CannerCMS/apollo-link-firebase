@@ -132,7 +132,7 @@ describe('rtdbLink', () => {
       const query = gql`
         query($ref: string) {
           articles @rtdbQuery(ref: $ref) @array {
-            id @rtdbKey
+            id @key
             count,
             title,
             nested {
@@ -153,7 +153,7 @@ describe('rtdbLink', () => {
       const query = gql`
         query($ref: string) {
           articles @rtdbQuery(ref: $ref, orderByChild: "count") @array {
-            id @rtdbKey
+            id @key
             count,
             title
           }
@@ -168,7 +168,7 @@ describe('rtdbLink', () => {
       const query = gql`
         query($ref: string) {
           articles @rtdbQuery(ref: $ref, orderByChild: "count", limitToFirst: 2) @array {
-            id @rtdbKey
+            id @key
             count,
             title
           }
@@ -184,11 +184,11 @@ describe('rtdbLink', () => {
       const query = gql`
         query($ref: string) {
           articles @rtdbQuery(ref: $ref) @array {
-            id @rtdbKey
+            id @key
             count,
             title,
             comments @array {
-              id @rtdbKey
+              id @key
               content
             }
           }
@@ -207,11 +207,11 @@ describe('rtdbLink', () => {
       const query = gql`
         query($ref: string) {
           articles @rtdbQuery(ref: $ref) @array {
-            id @rtdbKey
+            id @key
             count,
             title,
             dynamicCounts @array {
-              id @rtdbKey
+              id @key
               count @val
             }
           }
@@ -228,11 +228,11 @@ describe('rtdbLink', () => {
       const query = gql`
         query($ref: string, $reviewRef: string) {
           articles @rtdbQuery(ref: $ref) @array {
-            id @rtdbKey @export
+            id @key @export
             count,
             title,
             reviews @rtdbQuery(ref: $reviewRef, orderByChild: "articleId", equalTo: "$export$id") @array {
-              id @rtdbKey
+              id @key
               content
             }
           }
