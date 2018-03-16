@@ -17,7 +17,18 @@ const mockArticles = (len: number) => {
       return {
         id: num,
         count: len - num,
-        title: faker.lorem.words(10)
+        title: faker.lorem.words(10),
+        comments: {
+          1: {
+            content: faker.lorem.words(10)
+          },
+          2: {
+            content: faker.lorem.words(10)
+          },
+          3: {
+            content: faker.lorem.words(10)
+          }
+        }
       };
     }))
   );
@@ -137,6 +148,29 @@ describe('rtdbLink', () => {
       const result = await resolve(query, null, context, {ref: `${TEST_NAMESPACE}/articles`});
       expect(result.articles[0].count < result.articles[1].count).to.be.true;
       expect(result.articles.length).to.be.equal(2);
+    });
+
+    it('should query nested array', async () => {
+      const query = gql`
+        query($ref: string) {
+          articles @rtdbQuery(ref: $ref) @array {
+            id @rtdbKey
+            count,
+            title,
+            comments @array {
+              id @rtdbKey
+              content
+            }
+          }
+        }
+      `;
+
+      const result = await resolve(query, null, context, {ref: `${TEST_NAMESPACE}/articles`});
+      expect(result.articles[0].comments.length).to.be.equal(3);
+      expect(result.articles[0].comments[0]).to.be.eql({
+        id: "1",
+        ...articles[0].comments[1]
+      });
     });
   });
 });

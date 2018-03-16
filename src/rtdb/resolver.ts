@@ -27,7 +27,7 @@ export interface RtdbDirectives {
   equalTo?: any
 }
 
-const snapshotToArray = (snapshot: database.DataSnapshot, typename: string): any[] => {
+const snapshotToArray = (snapshot: database.DataSnapshot, typename?: string): any[] => {
   const ret = [];
   snapshot.forEach(childSnapshot => {
     ret.push({
@@ -83,6 +83,11 @@ const resolver: Resolver = async (
 
   // selectionSet without rtdbQuery directive
   if (!isLeaf && !has(directives, 'rtdbQuery')) {
+    if (has(directives, 'array')) {
+      const toArray = has(directives, 'array');
+      return snapshotToArray(root.__snapshot.child(resultKey), null);
+    }
+
     return {
       __snapshot: root.__snapshot.child(resultKey)
     };
