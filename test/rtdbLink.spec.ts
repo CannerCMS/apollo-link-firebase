@@ -18,6 +18,9 @@ const mockArticles = (len: number) => {
         id: num,
         count: len - num,
         title: faker.lorem.words(10),
+        nested: {
+          nestedField: faker.lorem.words(10)
+        },
         comments: {
           1: {
             content: faker.lorem.words(10)
@@ -110,13 +113,19 @@ describe('rtdbLink', () => {
           articles @rtdbQuery(ref: $ref) @array {
             id @rtdbKey
             count,
-            title
+            title,
+            nested {
+              nestedField
+            }
           }
         }
       `;
 
       const result = await resolve(query, null, context, {ref: `${TEST_NAMESPACE}/articles`});
       expect(result.articles.length).to.be.equal(ARTICLE_LEN);
+      expect(result.articles[0].count).to.be.equal(articles[0].count);
+      expect(result.articles[0].title).to.be.equal(articles[0].title);
+      expect(result.articles[0].nested).to.be.eql(articles[0].nested);
     });
 
     it('should query array with orderByChild', async () => {
