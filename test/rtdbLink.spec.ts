@@ -458,29 +458,35 @@ describe('rtdbLink', () => {
   });
 
   describe('mutation', () => {
-    // it('should query object', async () => {
-    //   const mutation = gql`
-    //     fragment ProfileInput {
-    //       string: String
-    //       number: Number
-    //     }
+    it('should query object', async () => {
+      const mutation = gql`
+        fragment ProfileInput on firebase {
+          string: String
+          number: Number
+        }
 
-    //     mutation($ref: string, $input: ProfileInput!) {
-    //       updateProfile(input: $input) @rtdbUpdate(ref: $ref) {
-    //         string,
-    //         number
-    //       }
-    //     }
-    //   `;
+        mutation($ref: string, $input: ProfileInput!) {
+          updateProfile(input: $input) @rtdbUpdate(ref: $ref) {
+            string,
+            number
+          }
+        }
+      `;
 
-    //   const result = await resolve(mutation, null, context, {
-    //     ref: `${TEST_NAMESPACE}/object`,
-    //     input: {
-    //       string: "wwwy3y32",
-    //       number: 3
-    //     }
-    //   });
-    //   console.log(result);
-    // });
+      const {data} = await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query: mutation,
+          variables: {
+            ref: `${TEST_NAMESPACE}/object`,
+            input: {
+              string: "wwwy3y32",
+              number: 3
+            }
+          }
+        }),
+      );
+      console.log(data);
+    });
   });
 });

@@ -1,7 +1,10 @@
+import {OperationTypeNode} from 'graphql';
 import {ApolloLink, Observable, FetchResult, Operation, NextLink} from 'apollo-link';
 import {
   hasDirectives,
-  addTypenameToDocument
+  addTypenameToDocument,
+  getMainDefinition,
+  getFragmentDefinitions
 } from 'apollo-utilities';
 import {
   database
@@ -16,14 +19,25 @@ export default class RtdbLink extends ApolloLink {
   }
 
   request(operation: Operation, forward?: NextLink): Observable<FetchResult> {
-    const isRtdbQuery = hasDirectives(['rtdbQuery'], operation.query);
+    const {query} = operation;
+    const isRtdbQuery = hasDirectives(['rtdbQuery', 'rtdbUpdate'], query);
+
     if (!isRtdbQuery && forward) {
       return forward(operation);
     }
 
-    const queryWithTypename = addTypenameToDocument(operation.query);
+    const queryWithTypename = addTypenameToDocument(query);
+    const mainDefinition = getMainDefinition(query);
+    const fragmentDefinitions = getFragmentDefinitions(query);
+
+    const operationType: OperationTypeNode =
+      (mainDefinition || ({} as any)).operation || 'query';
+
     const context: ResolverContext = {
       database: this.database,
+      mainDefinition,
+      fragmentDefinitions,
+      operationType,
       exportVal: {}
     };
 

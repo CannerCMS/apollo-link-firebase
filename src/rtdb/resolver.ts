@@ -1,6 +1,6 @@
 import { graphql, ExecInfo } from 'graphql-anywhere/lib/async';
 import { Resolver, VariableMap } from 'graphql-anywhere';
-import { DocumentNode } from 'graphql';
+import { DocumentNode, OperationTypeNode, OperationDefinitionNode, FragmentDefinitionNode } from 'graphql';
 import {
   database
 } from "firebase";
@@ -10,10 +10,13 @@ import * as isArray from "lodash/isArray";
 import * as mapValues from "lodash/mapValues";
 import * as trimStart from "lodash/trimStart";
 import * as isFunction from "lodash/isFunction";
-
+import mutationResolver from "./mutationResolver";
 
 export interface ResolverContext {
   database: database.Database,
+  operationType: OperationTypeNode,
+  mainDefinition: OperationDefinitionNode | FragmentDefinitionNode;
+  fragmentDefinitions: FragmentDefinitionNode[];
   exportVal: any
 }
 
@@ -80,7 +83,7 @@ const createQuery = ({database, directives, exportVal, snapshot}: {database: dat
   return query;
 };
 
-const resolver: Resolver = async (
+const queryResolver: Resolver = async (
   fieldName: string,
   root: any,
   args: any,
@@ -138,6 +141,17 @@ const resolver: Resolver = async (
     };
 };
 
+const getResolver = (operationType: string): Resolver => {
+  switch (operationType) {
+    case "query":
+      return queryResolver;
+    case "mutation":
+      return mutationResolver;
+    default:
+      throw new Error(`${operationType} not supported`);
+  }
+}
+
 export const resolve = (
   query: DocumentNode,
   rootValue?: any,
@@ -145,7 +159,7 @@ export const resolve = (
   variableValues?: VariableMap
 ): Promise<any> => {
   return graphql(
-    resolver,
+    getResolver(contextValue.operationType),
     query,
     rootValue,
     contextValue,
