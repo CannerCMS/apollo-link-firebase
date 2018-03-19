@@ -1,14 +1,32 @@
+import { execute, makePromise, ApolloLink } from 'apollo-link';
 import * as chai from "chai";
 import * as faker from "faker";
+import * as isArray from "lodash/isArray";
+import * as isPlainObject from "lodash/isPlainObject";
+import * as assignWith from "lodash/assignWith";
 import * as times from "lodash/fp/times";
 import * as reduce from "lodash/fp/reduce";
 import * as compose from "lodash/fp/compose";
 import * as omit from "lodash/omit";
 const expect = chai.expect;
 import { initialize } from "./database";
-import { resolve } from "../src/rtdb/resolver";
 import gql from 'graphql-tag';
+import RtdbLink from '../src/rtdb/link';
 const TEST_NAMESPACE = "__test__";
+
+type Result = { [index: string]: any };
+
+const cloneWithTypename = (data: any, typename: string | null = null) => {
+  const customizer = (objectValue: any, srcValue: any) => {
+    return (isPlainObject(srcValue))
+      ? cloneWithTypename(srcValue, typename)
+      : srcValue;
+  }
+
+  return (isArray(data))
+    ? data.map(item => cloneWithTypename(item, typename))
+    : assignWith({__typename: typename}, data, customizer);
+}
 
 const mockArticles = (len: number) => {
   const fn = compose(
@@ -83,7 +101,20 @@ const mockAuthors = (len: number) => {
 
 describe('rtdbLink', () => {
   let defaultApp;
-  let context;
+  let link: RtdbLink;
+  before(async () => {
+    // setup data
+    defaultApp = await initialize();
+    link = new RtdbLink({
+      database: defaultApp.database()
+    });
+  });
+
+  after(async () => {
+    await defaultApp.database().ref(TEST_NAMESPACE).remove();
+    return defaultApp.delete();
+  })
+
   describe('query', () => {
     const object = {
       string: "wwwy3y3",
@@ -101,19 +132,11 @@ describe('rtdbLink', () => {
     const authors = mockAuthors(6);
 
     before(async () => {
-      // setup data
-      defaultApp = await initialize();
-      context = {database: defaultApp.database(), exportVal: {}};
       await defaultApp.database().ref(TEST_NAMESPACE).child('object').set(object);
       await defaultApp.database().ref(TEST_NAMESPACE).child('articles').set(articles);
       await defaultApp.database().ref(TEST_NAMESPACE).child('reviews').set(reviews);
       await defaultApp.database().ref(TEST_NAMESPACE).child('authors').set(authors);
     });
-
-    after(async () => {
-      await defaultApp.database().ref(TEST_NAMESPACE).remove();
-      return defaultApp.delete();
-    })
 
     it('should query object', async () => {
       const objectQuery = gql`
@@ -129,8 +152,14 @@ describe('rtdbLink', () => {
         }
       `;
 
-      const result = await resolve(objectQuery, null, context, {ref: `${TEST_NAMESPACE}/object`});
-      expect(result.object).to.be.eql(object);
+      const {data} = await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query: objectQuery,
+          variables: {ref: `${TEST_NAMESPACE}/object`}
+        }),
+      );
+      expect(data.object).to.be.eql(cloneWithTypename(object));
     });
 
     it('should query object with fields not exist', async () => {
@@ -146,10 +175,17 @@ describe('rtdbLink', () => {
         }
       `;
 
-      const result = await resolve(objectQuery, null, context, {ref: `${TEST_NAMESPACE}/object`});
-      expect(result.object).to.be.eql({
+      const {data} = await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query: objectQuery,
+          variables: {ref: `${TEST_NAMESPACE}/object`}
+        }),
+      );
+      expect(data.object).to.be.eql({
+        __typename: null,
         notExist: null,
-        notExistObject: { city: null, address: null }
+        notExistObject: { __typename: null, city: null, address: null }
       });
     });
 
@@ -167,11 +203,17 @@ describe('rtdbLink', () => {
         }
       `;
 
-      const result = await resolve(query, null, context, {ref: `${TEST_NAMESPACE}/articles`});
-      expect(result.articles.length).to.be.equal(ARTICLE_LEN);
-      expect(result.articles[0].count).to.be.equal(articles[0].count);
-      expect(result.articles[0].title).to.be.equal(articles[0].title);
-      expect(result.articles[0].nested).to.be.eql(articles[0].nested);
+      const {data} = await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query,
+          variables: {ref: `${TEST_NAMESPACE}/articles`}
+        }),
+      );
+      expect(data.articles.length).to.be.equal(ARTICLE_LEN);
+      expect(data.articles[0].count).to.be.equal(articles[0].count);
+      expect(data.articles[0].title).to.be.equal(articles[0].title);
+      expect(data.articles[0].nested).to.be.eql(cloneWithTypename(articles[0].nested));
     });
 
     it('should query array with orderByChild', async () => {
@@ -185,8 +227,14 @@ describe('rtdbLink', () => {
         }
       `;
 
-      const result = await resolve(query, null, context, {ref: `${TEST_NAMESPACE}/articles`});
-      expect(result.articles[0].count < result.articles[1].count).to.be.true;
+      const {data} = await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query,
+          variables: {ref: `${TEST_NAMESPACE}/articles`}
+        }),
+      );
+      expect(data.articles[0].count < data.articles[1].count).to.be.true;
     });
 
     it('should query array with orderByChild & limitToFirst', async () => {
@@ -200,9 +248,15 @@ describe('rtdbLink', () => {
         }
       `;
 
-      const result = await resolve(query, null, context, {ref: `${TEST_NAMESPACE}/articles`});
-      expect(result.articles[0].count < result.articles[1].count).to.be.true;
-      expect(result.articles.length).to.be.equal(2);
+      const {data} = await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query,
+          variables: {ref: `${TEST_NAMESPACE}/articles`}
+        }),
+      );
+      expect(data.articles[0].count < data.articles[1].count).to.be.true;
+      expect(data.articles.length).to.be.equal(2);
     });
 
     it('should query nested array', async () => {
@@ -220,9 +274,16 @@ describe('rtdbLink', () => {
         }
       `;
 
-      const result = await resolve(query, null, context, {ref: `${TEST_NAMESPACE}/articles`});
-      expect(result.articles[0].comments.length).to.be.equal(3);
-      expect(result.articles[0].comments[0]).to.be.eql({
+      const {data} = await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query,
+          variables: {ref: `${TEST_NAMESPACE}/articles`}
+        }),
+      );
+      expect(data.articles[0].comments.length).to.be.equal(3);
+      expect(data.articles[0].comments[0]).to.be.eql({
+        __typename: null,
         id: "1",
         ...articles[0].comments[1]
       });
@@ -243,10 +304,16 @@ describe('rtdbLink', () => {
         }
       `;
 
-      const result = await resolve(query, null, context, {ref: `${TEST_NAMESPACE}/articles`});
+      const {data} = await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query,
+          variables: {ref: `${TEST_NAMESPACE}/articles`}
+        }),
+      );
       const dynamicCountsKeys = Object.keys(articles[0].dynamicCounts);
-      expect(result.articles[0].dynamicCounts.length).to.be.equal(dynamicCountsKeys.length);
-      expect(result.articles[0].dynamicCounts[0].count).to.be.eql(articles[0].dynamicCounts[dynamicCountsKeys[0]]);
+      expect(data.articles[0].dynamicCounts.length).to.be.equal(dynamicCountsKeys.length);
+      expect(data.articles[0].dynamicCounts[0].count).to.be.eql(articles[0].dynamicCounts[dynamicCountsKeys[0]]);
     });
 
     it('should query relation data with root value', async () => {
@@ -264,9 +331,15 @@ describe('rtdbLink', () => {
         }
       `;
 
-      const result = await resolve(query, null, context, {ref: `${TEST_NAMESPACE}/articles`, reviewRef: `${TEST_NAMESPACE}/reviews`});
-      expect(result.articles[0].reviews.length).to.be.equal(0);
-      expect(result.articles[1].reviews.length).to.be.equal(3);
+      const {data} = await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query,
+          variables: {ref: `${TEST_NAMESPACE}/articles`, reviewRef: `${TEST_NAMESPACE}/reviews`}
+        }),
+      );
+      expect(data.articles[0].reviews.length).to.be.equal(0);
+      expect(data.articles[1].reviews.length).to.be.equal(3);
     });
 
     it('should query relation data in nested array', async () => {
@@ -286,32 +359,46 @@ describe('rtdbLink', () => {
         }
       `;
 
-      const result = await resolve(query, null, context, {
-        ref: `${TEST_NAMESPACE}/articles`,
-        authorRef: ({exportVal}) => `${TEST_NAMESPACE}/authors/${exportVal.id}`
-      });
-      expect(result.articles[0].authors[0]).to.be.eql({
+      const {data} = await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query,
+          variables: {
+            ref: `${TEST_NAMESPACE}/articles`,
+            authorRef: ({exportVal}) => `${TEST_NAMESPACE}/authors/${exportVal.id}`  
+          }
+        }),
+      );
+      expect(data.articles[0].authors[0]).to.be.eql({
+        __typename: null,
         id: "0",
         info: {
+          __typename: null,
           name: authors[0].name
         }
       });
-      expect(result.articles[0].authors[1]).to.be.eql({
+      expect(data.articles[0].authors[1]).to.be.eql({
+        __typename: null,
         id: "1",
         info: {
+          __typename: null,
           name: authors[1].name
         }
       });
 
-      expect(result.articles[1].authors[0]).to.be.eql({
+      expect(data.articles[1].authors[0]).to.be.eql({
+        __typename: null,
         id: "1",
         info: {
+          __typename: null,
           name: authors[1].name
         }
       });
-      expect(result.articles[1].authors[1]).to.be.eql({
+      expect(data.articles[1].authors[1]).to.be.eql({
+        __typename: null,
         id: "2",
         info: {
+          __typename: null,
           name: authors[2].name
         }
       });
@@ -342,22 +429,58 @@ describe('rtdbLink', () => {
         }
       `;
 
-      const result = await resolve(query, null, context, {
-        ref: `${TEST_NAMESPACE}/articles`,
-        mainAuthor: ({exportVal}) => `${TEST_NAMESPACE}/authors/${exportVal.mainAuthor}`,
-        nestedMain: ({exportVal}) => `${TEST_NAMESPACE}/authors/${exportVal.main}`,
-        nestedSecond: ({exportVal}) => `${TEST_NAMESPACE}/authors/${exportVal.second}`
-      });
+      const {data} = await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query,
+          variables: {
+            ref: `${TEST_NAMESPACE}/articles`,
+            mainAuthor: ({exportVal}) => `${TEST_NAMESPACE}/authors/${exportVal.mainAuthor}`,
+            nestedMain: ({exportVal}) => `${TEST_NAMESPACE}/authors/${exportVal.main}`,
+            nestedSecond: ({exportVal}) => `${TEST_NAMESPACE}/authors/${exportVal.second}`
+          }
+        }),
+      );
       
-      expect(result.articles[0].mainAuthorData).to.be.eql({
+      expect(data.articles[0].mainAuthorData).to.be.eql({
+        __typename: null,
         name: authors[0].name
       });
-      expect(result.articles[0].authorsAsObject.mainData).to.be.eql({
+      expect(data.articles[0].authorsAsObject.mainData).to.be.eql({
+        __typename: null,
         name: authors[0].name
       });
-      expect(result.articles[0].authorsAsObject.secondData).to.be.eql({
+      expect(data.articles[0].authorsAsObject.secondData).to.be.eql({
+        __typename: null,
         name: authors[1].name
       });
     });
+  });
+
+  describe('mutation', () => {
+    // it('should query object', async () => {
+    //   const mutation = gql`
+    //     fragment ProfileInput {
+    //       string: String
+    //       number: Number
+    //     }
+
+    //     mutation($ref: string, $input: ProfileInput!) {
+    //       updateProfile(input: $input) @rtdbUpdate(ref: $ref) {
+    //         string,
+    //         number
+    //       }
+    //     }
+    //   `;
+
+    //   const result = await resolve(mutation, null, context, {
+    //     ref: `${TEST_NAMESPACE}/object`,
+    //     input: {
+    //       string: "wwwy3y32",
+    //       number: 3
+    //     }
+    //   });
+    //   console.log(result);
+    // });
   });
 });
