@@ -9,6 +9,7 @@ import * as has from "lodash/has";
 import * as isArray from "lodash/isArray";
 import * as mapValues from "lodash/mapValues";
 import * as trimStart from "lodash/trimStart";
+import * as isFunction from "lodash/isFunction";
 
 
 export interface ResolverContext {
@@ -42,14 +43,18 @@ const snapshotToArray = (snapshot: database.DataSnapshot, typename?: string): an
   return ret;
 }
 
-const createQuery = ({database, directives, exportVal}: {database: database.Database, directives: RtdbDirectives, exportVal: any}): database.Query => {
-  let query: database.Query | database.Reference = database.ref(directives.ref);
-  // relace $export$field
+const createQuery = ({database, directives, exportVal, snapshot}: {database: database.Database, directives: RtdbDirectives, exportVal: any, snapshot?: database.DataSnapshot}): database.Query => {
+  // replace $export$field
   directives = mapValues(directives, val => {
-    return (val.startsWith && val.startsWith("$export$"))
-      ? exportVal[trimStart(val, "$export$")]
-      : val;
+    if (isFunction(val))
+      return val({root: snapshot, exportVal});
+
+    if (val.startsWith && val.startsWith("$export$"))
+      return exportVal[trimStart(val, "$export$")];
+    return val;
   });
+
+  let query: database.Query | database.Reference = database.ref(directives.ref);
 
   // orderBy
   if (directives.orderByChild) {
@@ -114,9 +119,14 @@ const resolver: Resolver = async (
     };
   }
 
-  const query = createQuery({database, directives: directives.rtdbQuery, exportVal});
+  const query = createQuery({
+    database,
+    directives: directives.rtdbQuery,
+    exportVal,
+    snapshot: root && root.__snapshot
+  });
   const snapshot: database.DataSnapshot = await query.once('value');
-  
+
   const {type} = directives.rtdbQuery as RtdbDirectives;
   const toArray = has(directives, 'array');
   // parse snapshot as array or object

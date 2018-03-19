@@ -25,6 +25,15 @@ const mockArticles = (len: number) => {
           id1: 1,
           id2: 2
         },
+        authors: {
+          [num]: true,
+          [num+1]: true
+        },
+        mainAuthor: num,
+        authorsAsObject: {
+          main: num,
+          second: num+1
+        },
         comments: {
           1: {
             content: faker.lorem.words(10)
@@ -58,6 +67,20 @@ const mockReviews = (len: number) => {
   return fn(len);
 }
 
+const mockAuthors = (len: number) => {
+  const fn = compose(
+    reduce((result, obj) => Object.assign({[obj.id]: omit(obj, "id")}, result), {}),
+    times(((num: number) => {
+      return {
+        id: num,
+        name: faker.name.firstName()
+      };
+    }))
+  );
+
+  return fn(len);
+}
+
 describe('rtdbLink', () => {
   let defaultApp;
   let context;
@@ -75,6 +98,7 @@ describe('rtdbLink', () => {
     const ARTICLE_LEN = 5;
     const articles = mockArticles(ARTICLE_LEN);
     const reviews = mockReviews(3);
+    const authors = mockAuthors(6);
 
     before(async () => {
       // setup data
@@ -83,6 +107,7 @@ describe('rtdbLink', () => {
       await defaultApp.database().ref(TEST_NAMESPACE).child('object').set(object);
       await defaultApp.database().ref(TEST_NAMESPACE).child('articles').set(articles);
       await defaultApp.database().ref(TEST_NAMESPACE).child('reviews').set(reviews);
+      await defaultApp.database().ref(TEST_NAMESPACE).child('authors').set(authors);
     });
 
     after(async () => {
@@ -229,8 +254,8 @@ describe('rtdbLink', () => {
         query($ref: string, $reviewRef: string) {
           articles @rtdbQuery(ref: $ref) @array {
             id @key @export
-            count,
-            title,
+            count
+            title
             reviews @rtdbQuery(ref: $reviewRef, orderByChild: "articleId", equalTo: "$export$id") @array {
               id @key
               content
@@ -242,6 +267,54 @@ describe('rtdbLink', () => {
       const result = await resolve(query, null, context, {ref: `${TEST_NAMESPACE}/articles`, reviewRef: `${TEST_NAMESPACE}/reviews`});
       expect(result.articles[0].reviews.length).to.be.equal(0);
       expect(result.articles[1].reviews.length).to.be.equal(3);
+    });
+
+    it('should query relation data with child field', async () => {
+      const query = gql`
+        query($ref: string, $authorRef: string) {
+          articles @rtdbQuery(ref: $ref) @array {
+            id @key
+            count
+            title
+            authors @array {
+              id @key @export
+              info @rtdbQuery(ref: $authorRef) {
+                name
+              }
+            }
+          }
+        }
+      `;
+
+      const result = await resolve(query, null, context, {
+        ref: `${TEST_NAMESPACE}/articles`,
+        authorRef: ({exportVal}) => `${TEST_NAMESPACE}/authors/${exportVal.id}`
+      });
+      expect(result.articles[0].authors[0]).to.be.eql({
+        id: "0",
+        info: {
+          name: authors[0].name
+        }
+      });
+      expect(result.articles[0].authors[1]).to.be.eql({
+        id: "1",
+        info: {
+          name: authors[1].name
+        }
+      });
+
+      expect(result.articles[1].authors[0]).to.be.eql({
+        id: "1",
+        info: {
+          name: authors[1].name
+        }
+      });
+      expect(result.articles[1].authors[1]).to.be.eql({
+        id: "2",
+        info: {
+          name: authors[2].name
+        }
+      });
     });
   });
 });
