@@ -269,7 +269,7 @@ describe('rtdbLink', () => {
       expect(result.articles[1].reviews.length).to.be.equal(3);
     });
 
-    it('should query relation data with child field', async () => {
+    it('should query relation data in nested array', async () => {
       const query = gql`
         query($ref: string, $authorRef: string) {
           articles @rtdbQuery(ref: $ref) @array {
@@ -314,6 +314,49 @@ describe('rtdbLink', () => {
         info: {
           name: authors[2].name
         }
+      });
+    });
+
+    it('should query relation data in field & nested object', async () => {
+      const query = gql`
+        query($ref: string, $mainAuthor: any, $nestedMain: any, $nestedSecond: any) {
+          articles @rtdbQuery(ref: $ref) @array {
+            id @key
+            count
+            title
+            mainAuthor @export
+            authorsAsObject {
+              main @export
+              second @export
+              mainData @rtdbQuery(ref: $nestedMain) {
+                name
+              }
+              secondData @rtdbQuery(ref: $nestedSecond) {
+                name
+              }
+            }
+            mainAuthorData @rtdbQuery(ref: $mainAuthor) {
+              name
+            }
+          }
+        }
+      `;
+
+      const result = await resolve(query, null, context, {
+        ref: `${TEST_NAMESPACE}/articles`,
+        mainAuthor: ({exportVal}) => `${TEST_NAMESPACE}/authors/${exportVal.mainAuthor}`,
+        nestedMain: ({exportVal}) => `${TEST_NAMESPACE}/authors/${exportVal.main}`,
+        nestedSecond: ({exportVal}) => `${TEST_NAMESPACE}/authors/${exportVal.second}`
+      });
+      
+      expect(result.articles[0].mainAuthorData).to.be.eql({
+        name: authors[0].name
+      });
+      expect(result.articles[0].authorsAsObject.mainData).to.be.eql({
+        name: authors[0].name
+      });
+      expect(result.articles[0].authorsAsObject.secondData).to.be.eql({
+        name: authors[1].name
       });
     });
   });
