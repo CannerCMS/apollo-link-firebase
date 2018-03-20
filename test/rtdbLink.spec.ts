@@ -643,5 +643,62 @@ describe('rtdbLink', () => {
         string: null
       });
     });
+
+    it('should push object', async () => {
+      const mutation = gql`
+        fragment ProfileInput on firebase {
+          string: String
+          number: Number
+        }
+
+        mutation($ref: string, $input: ProfileInput!) {
+          pushdata(input: $input) @rtdbPush(ref: $ref) {
+            id @pushKey
+            field
+          }
+        }
+      `;
+
+      const {data: {pushdata}} = await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query: mutation,
+          variables: {
+            ref: `${TEST_NAMESPACE}/array`,
+            input: {
+              string: "wwwy3y3",
+              number: 1
+            }
+          }
+        })
+      );
+
+      expect(pushdata).to.have.property("id");
+      expect(pushdata.field).to.be.null;
+
+      // read data
+      const objectQuery = gql`
+        query($ref: string) {
+          object @rtdbQuery(ref: $ref) {
+            string,
+            number
+          }
+        }
+      `;
+
+      const {data} = await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query: objectQuery,
+          variables: {ref: `${TEST_NAMESPACE}/array/${pushdata.id}`}
+        }),
+      );
+
+      expect(data.object).to.be.eql({
+        __typename: null,
+        string: "wwwy3y3",
+        number: 1
+      });
+    });
   });
 });

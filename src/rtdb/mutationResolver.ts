@@ -25,6 +25,12 @@ const resolver: Resolver = async (
   const {resultKey, directives, isLeaf} = info;
   const {fragmentDefinitions, database} = context;
 
+  // return leaf in mutation
+  if (isLeaf && root) {
+    const snapshot = root.__snapshot;
+    return has(directives, "pushKey") ? snapshot.key : null;
+  }
+
   // By convention GraphQL recommends mutations having a single argument named "input"
   // https://dev-blog.apollodata.com/designing-graphql-mutations-e09de826ed97
   const payload: any = args && args.input;
@@ -39,8 +45,16 @@ const resolver: Resolver = async (
   } else if (has(directives, "rtdbRemove")) {
     const {ref} = directives.rtdbRemove;
     await database.ref(ref).remove();
+  } else if (has(directives, "rtdbPush")) {
+    const {ref} = directives.rtdbPush;
+    const newRef = database.ref(ref).push();
+    await newRef.set(payload);
+    return {
+      __snapshot: newRef
+    };
   }
-  return true;
+
+  return null;
 }
 
 export default resolver;
