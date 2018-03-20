@@ -1,5 +1,6 @@
 import { graphql, ExecInfo } from 'graphql-anywhere/lib/async';
 import { Resolver, VariableMap } from 'graphql-anywhere';
+import * as has from "lodash/has";
 import { DocumentNode, OperationTypeNode, OperationDefinitionNode, FragmentDefinitionNode } from 'graphql';
 import {
   database
@@ -14,21 +15,32 @@ export interface ResolverContext {
   exportVal: any
 }
 
-const resolver: Resolver = (
+const resolver: Resolver = async (
   fieldName: string,
   root: any,
   args: any,
   context: ResolverContext,
   info: ExecInfo
 ) => {
-  const {resultKey} = info;
-  const {fragmentDefinitions} = context;
-  const fragmentMap = createFragmentMap(fragmentDefinitions);
-  console.log(fragmentMap);
-  console.log(args);
-  console.log(root);
-  console.log(resultKey);
-  return (root && root[resultKey]) || (args && args.input) || null;
+  const {resultKey, directives, isLeaf} = info;
+  const {fragmentDefinitions, database} = context;
+
+  // By convention GraphQL recommends mutations having a single argument named "input"
+  // https://dev-blog.apollodata.com/designing-graphql-mutations-e09de826ed97
+  const payload: any = args.input;
+
+  // deal with @rtdbUpdate, @rtdbSet, @rtdbRemove
+  if (has(directives, "rtdbUpdate")) {
+    const {ref} = directives.rtdbUpdate;
+    await database.ref(ref).update(payload);
+  } else if (has(directives, "rtdbSet")) {
+    const {ref} = directives.rtdbSet;
+    await database.ref(ref).set(payload);
+  } else if (has(directives, "rtdbRemove")) {
+    const {ref} = directives.rtdbRemove;
+    await database.ref(ref).remove();
+  }
+  return true;
 }
 
 export default resolver;

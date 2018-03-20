@@ -466,14 +466,11 @@ describe('rtdbLink', () => {
         }
 
         mutation($ref: string, $input: ProfileInput!) {
-          updateProfile(input: $input) @rtdbUpdate(ref: $ref) {
-            string,
-            number
-          }
+          updateProfile(input: $input) @rtdbUpdate(ref: $ref)
         }
       `;
 
-      const {data} = await makePromise<Result>(
+      await makePromise<Result>(
         execute(link, {
           operationName: 'query',
           query: mutation,
@@ -486,7 +483,38 @@ describe('rtdbLink', () => {
           }
         }),
       );
-      console.log(data);
+      
+      // read data
+      const objectQuery = gql`
+        query($ref: string) {
+          object @rtdbQuery(ref: $ref) {
+            string,
+            number,
+            nestedObject {
+              city,
+              address
+            }
+          }
+        }
+      `;
+
+      const {data} = await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query: objectQuery,
+          variables: {ref: `${TEST_NAMESPACE}/object`}
+        }),
+      );
+      expect(data.object).to.be.eql({
+        __typename: null,
+        string: "wwwy3y32",
+        number: 3,
+        nestedObject: {
+          city: "taipei",
+          address: "Fuyuan street",
+          __typename: null
+        }
+      });
     });
   });
 });
