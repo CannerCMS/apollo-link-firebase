@@ -458,7 +458,7 @@ describe('rtdbLink', () => {
   });
 
   describe('mutation', () => {
-    it('should query object', async () => {
+    it('should update object', async () => {
       const mutation = gql`
         fragment ProfileInput on firebase {
           string: String
@@ -503,6 +503,69 @@ describe('rtdbLink', () => {
           operationName: 'query',
           query: objectQuery,
           variables: {ref: `${TEST_NAMESPACE}/object`}
+        }),
+      );
+      expect(data.object).to.be.eql({
+        __typename: null,
+        string: "wwwy3y32",
+        number: 3,
+        nestedObject: {
+          city: "taipei",
+          address: "Fuyuan street",
+          __typename: null
+        }
+      });
+    });
+
+    it('should set object', async () => {
+      const mutation = gql`
+        fragment ProfileInput on firebase {
+          string: String
+          number: Number
+        }
+
+        mutation($ref: string, $input: ProfileInput!) {
+          updateProfile(input: $input) @rtdbSet(ref: $ref)
+        }
+      `;
+
+      await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query: mutation,
+          variables: {
+            ref: `${TEST_NAMESPACE}/newObject`,
+            input: {
+              string: "wwwy3y32",
+              number: 3,
+              nestedObject: {
+                city: "taipei",
+                address: "Fuyuan street"
+              }
+            }
+          }
+        }),
+      );
+      
+      // read data
+      const objectQuery = gql`
+        query($ref: string) {
+          object @rtdbQuery(ref: $ref) {
+            string,
+            number,
+            nestedObject {
+              city,
+              address
+            }
+          }
+        }
+      `;
+
+      const {data} = await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query: objectQuery,
+          variables: {ref: `${TEST_NAMESPACE}/newObject`}
         }),
       );
       expect(data.object).to.be.eql({
