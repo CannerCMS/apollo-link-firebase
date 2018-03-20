@@ -27,7 +27,7 @@ const resolver: Resolver = async (
 
   // By convention GraphQL recommends mutations having a single argument named "input"
   // https://dev-blog.apollodata.com/designing-graphql-mutations-e09de826ed97
-  const payload: any = args.input;
+  const payload: any = args && args.input;
 
   // deal with @rtdbUpdate, @rtdbSet, @rtdbRemove
   if (has(directives, "rtdbUpdate")) {

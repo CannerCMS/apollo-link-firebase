@@ -544,7 +544,7 @@ describe('rtdbLink', () => {
               }
             }
           }
-        }),
+        })
       );
       
       // read data
@@ -577,6 +577,70 @@ describe('rtdbLink', () => {
           address: "Fuyuan street",
           __typename: null
         }
+      });
+    });
+
+    it('should remove object', async () => {
+      // set first and remove later
+      const mutation = gql`
+        fragment ProfileInput on firebase {
+          string: String
+        }
+
+        mutation($ref: string, $input: ProfileInput!) {
+          updateProfile(input: $input) @rtdbSet(ref: $ref)
+        }
+      `;
+
+      await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query: mutation,
+          variables: {
+            ref: `${TEST_NAMESPACE}/forDelete`,
+            input: {
+              string: "wwwy3y32"
+            }
+          }
+        })
+      );
+
+      // delete
+      const deleteMutation = gql`
+        mutation($ref: string) {
+          deleteProfile @rtdbRemove(ref: $ref)
+        }
+      `;
+
+      await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query: deleteMutation,
+          variables: {
+            ref: `${TEST_NAMESPACE}/forDelete`
+          }
+        })
+      );
+
+      // read data
+      const objectQuery = gql`
+        query($ref: string) {
+          object @rtdbQuery(ref: $ref) {
+            string
+          }
+        }
+      `;
+
+      const {data} = await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query: objectQuery,
+          variables: {ref: `${TEST_NAMESPACE}/forDelete`}
+        }),
+      );
+      expect(data.object).to.be.eql({
+        __typename: null,
+        string: null
       });
     });
   });
