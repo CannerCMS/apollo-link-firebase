@@ -20,7 +20,7 @@ export default class RtdbLink extends ApolloLink {
 
   request(operation: Operation, forward?: NextLink): Observable<FetchResult> {
     const {query} = operation;
-    const isRtdbQuery = hasDirectives(['rtdbQuery', 'rtdbUpdate'], query);
+    const isRtdbQuery = hasDirectives(['rtdbQuery', 'rtdbUpdate', 'rtdbSet', 'rtdbRemove', 'rtdbPush'], query);
 
     if (!isRtdbQuery && forward) {
       return forward(operation);
