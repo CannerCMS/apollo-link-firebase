@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "lint": "tslint -c tslint.json src/**/*.ts",
-    "test": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' mocha --timeout 10000 --compilers ts:ts-node/register --recursive \"test/**/*.spec.ts\"",
+    "test": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' mocha --timeout 10000 --compilers ts:ts-node/register --recursive --exit \"test/**/*.spec.ts\"",
     "clean": "rimraf lib dist",
     "build": "webpack -p --progress --colors",
     "start": "./node_modules/.bin/webpack-dev-server --config webpack.config.dev.js --mode development",
