@@ -707,13 +707,15 @@ describe('rtdbLink', () => {
 
   describe('subscription', () => {
     let subLink;
+    let idAdded;
+
     before(() => {
       subLink = new SubLink({
         database: defaultApp.database()
       });
     });
 
-    it("should subscribe", (done) => {
+    it("should subscribe using child_added", (done) => {
       const subQuery = gql`
         subscription($ref: string) {
           newArticle @rtdbSub(ref: $ref, event: "child_added") {
@@ -730,11 +732,13 @@ describe('rtdbLink', () => {
         }
       });
       const callback = sinon.spy();
-      obs.subscribe(({data}) => {
+      const subscription = obs.subscribe(({data}) => {
         callback();
+        idAdded = data.newArticle.id;
         expect(callback.calledOnce).to.be.true;
         expect(data.newArticle).to.have.property("id");
         expect(data.newArticle.string).to.be.equal("wwwy3y3");
+        subscription.unsubscribe();
         done();
       });
 
@@ -760,6 +764,99 @@ describe('rtdbLink', () => {
             input: {
               string: "wwwy3y3"
             }
+          }
+        })
+      );
+    });
+
+    it("should subscribe using child_changed", (done) => {
+      const subQuery = gql`
+        subscription($ref: string) {
+          subscribeUpdate @rtdbSub(ref: $ref, event: "child_changed") {
+            id @key
+            string
+          }
+        }
+      `;
+
+      const obs = execute(subLink, {
+        query: subQuery,
+        variables: {
+          ref: `${TEST_NAMESPACE}/testSub`
+        }
+      });
+      const callback = sinon.spy();
+      const subscription = obs.subscribe(({data}) => {
+        callback();
+        expect(callback.calledOnce).to.be.true;
+        expect(data.subscribeUpdate.id).to.be.equal(idAdded);
+        expect(data.subscribeUpdate.string).to.be.equal("wwwy3y32");
+        subscription.unsubscribe();
+        done();
+      });
+
+      // push article
+      const mutation = gql`
+        fragment ObjectInput on firebase {
+          string: String
+        }
+
+        mutation($ref: string, $input: ObjectInput!) {
+          updateSub(input: $input) @rtdbUpdate(ref: $ref)
+        }
+      `;
+
+      makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query: mutation,
+          variables: {
+            ref: `${TEST_NAMESPACE}/testSub/${idAdded}`,
+            input: {
+              string: "wwwy3y32"
+            }
+          }
+        })
+      );
+    });
+
+    it("should subscribe using child_removed", (done) => {
+      const subQuery = gql`
+        subscription($ref: string) {
+          subscribeRemoved @rtdbSub(ref: $ref, event: "child_removed") {
+            id @key
+          }
+        }
+      `;
+
+      const obs = execute(subLink, {
+        query: subQuery,
+        variables: {
+          ref: `${TEST_NAMESPACE}/testSub`
+        }
+      });
+      const callback = sinon.spy();
+      const subscription = obs.subscribe(({data}) => {
+        callback();
+        expect(callback.calledOnce).to.be.true;
+        expect(data.subscribeRemoved.id).to.be.equal(idAdded);
+        subscription.unsubscribe();
+        done();
+      });
+
+      // push article
+      const mutation = gql`
+        mutation($ref: string) {
+          remove @rtdbRemove(ref: $ref)
+        }
+      `;
+
+      makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query: mutation,
+          variables: {
+            ref: `${TEST_NAMESPACE}/testSub/${idAdded}`
           }
         })
       );
