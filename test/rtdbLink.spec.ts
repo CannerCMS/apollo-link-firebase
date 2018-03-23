@@ -715,6 +715,61 @@ describe('rtdbLink', () => {
       });
     });
 
+    it("should subscribe using value event", (done) => {
+      const subQuery = gql`
+        subscription($ref: string) {
+          value @rtdbSub(ref: $ref, event: "value") {
+            field {
+              nestedField
+            }
+          }
+        }
+      `;
+
+      const obs = execute(subLink, {
+        query: subQuery,
+        variables: {
+          ref: `${TEST_NAMESPACE}/testSubValue`
+        }
+      });
+      const callback = sinon.spy();
+      const subscription = obs.subscribe(({data}) => {
+        callback();
+        expect(callback.calledOnce).to.be.true;
+        expect(data.value.field.nestedField).to.be.equal("wwwy3y3");
+        subscription.unsubscribe();
+        done();
+      });
+
+      // push article
+      const mutation = gql`
+        fragment Input on firebase {
+          field {
+            nestedField
+          }
+        }
+
+        mutation($ref: string, $input: Input!) {
+          setData(input: $input) @rtdbSet(ref: $ref)
+        }
+      `;
+
+      makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query: mutation,
+          variables: {
+            ref: `${TEST_NAMESPACE}/testSubValue`,
+            input: {
+              field: {
+                nestedField: "wwwy3y3"
+              }
+            }
+          }
+        })
+      );
+    });
+
     it("should subscribe using child_added", (done) => {
       const subQuery = gql`
         subscription($ref: string) {
