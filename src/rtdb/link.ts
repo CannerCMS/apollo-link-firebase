@@ -1,15 +1,26 @@
-import {OperationTypeNode} from 'graphql';
-import {ApolloLink, Observable, FetchResult, Operation, NextLink} from 'apollo-link';
-import {
-  hasDirectives,
-  addTypenameToDocument,
-  getMainDefinition,
-  getFragmentDefinitions
-} from 'apollo-utilities';
-import {
-  database
-} from "firebase";
-import { resolve, ResolverContext } from "./resolver";
+import { OperationTypeNode } from 'graphql';
+import { graphql, ExecInfo } from 'graphql-anywhere/lib/async';
+import { ApolloLink, Observable, FetchResult, Operation, NextLink } from 'apollo-link';
+import { hasDirectives, addTypenameToDocument, getMainDefinition, getFragmentDefinitions } from 'apollo-utilities';
+import { database } from 'firebase';
+import { Resolver } from 'graphql-anywhere';
+import { ResolverContext } from './types';
+import { createQuery } from './utils';
+
+// resolvers
+import queryResolver from './queryResolver';
+import mutationResolver from './mutationResolver';
+
+const getResolver = (operationType: string): Resolver => {
+  switch (operationType) {
+    case 'query':
+      return queryResolver;
+    case 'mutation':
+      return mutationResolver;
+    default:
+      throw new Error(`${operationType} not supported`);
+  }
+}
 
 export default class RtdbLink extends ApolloLink {
   database: database.Database;
@@ -28,23 +39,24 @@ export default class RtdbLink extends ApolloLink {
 
     const queryWithTypename = addTypenameToDocument(query);
     const mainDefinition = getMainDefinition(query);
-    const fragmentDefinitions = getFragmentDefinitions(query);
-
     const operationType: OperationTypeNode =
       (mainDefinition || ({} as any)).operation || 'query';
 
+    // context for graphql-anywhere resolver
     const context: ResolverContext = {
       database: this.database,
-      mainDefinition,
-      fragmentDefinitions,
-      operationType,
+      findType: (directives) => directives.rtdbQuery.type,
       exportVal: {}
     };
 
+    // rootValue for graphql-anywhere resolver
+    const rootValue = {};
+
     return new Observable(observer => {
-      resolve(
+      graphql(
+        getResolver(operationType),
         queryWithTypename,
-        null,
+        rootValue,
         context,
         operation.variables
       )
