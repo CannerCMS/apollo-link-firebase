@@ -54,11 +54,14 @@ const queryResolver: Resolver = async (
     return leafReturn;
   }
 
-  // Either rootSnapshot not provided, or nested @rtdbQuery
-  // we fetch the new one and replace currentSnapshot
+  // rootSnapshot provided
   // p.s: rootSnapshot will be provided at subscription
   // because we need to listen to event change outside the resolver
-  if (!rootSnapshot && has(directives, 'rtdbQuery')) {
+  if (rootSnapshot) {
+    currentSnapshot = rootSnapshot;
+  } else if (has(directives, 'rtdbQuery')) {
+    // nested @rtdbQuery
+    // we fetch the new one and replace currentSnapshot
     const query = createQuery({
       database,
       directives: directives.rtdbQuery,
@@ -69,7 +72,7 @@ const queryResolver: Resolver = async (
   }
 
   // if it's nested selectionSet, we return the child
-  if (!isLeaf && !has(directives, 'rtdbQuery')) {
+  if (!isLeaf && !has(directives, 'rtdbQuery') && !rootSnapshot) {
     return (has(directives, 'array'))
       ? snapshotToArray(currentSnapshot.child(resultKey), null)
       : {

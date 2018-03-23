@@ -12,6 +12,9 @@ const expect = chai.expect;
 import { initialize } from "./database";
 import gql from 'graphql-tag';
 import RtdbLink from '../src/rtdb/link';
+import SubLink from '../src/rtdb/subscriptionLink';
+import { database } from 'firebase';
+import * as sinon from 'sinon';
 const TEST_NAMESPACE = "__test__";
 
 type Result = { [index: string]: any };
@@ -699,6 +702,67 @@ describe('rtdbLink', () => {
         string: "wwwy3y3",
         number: 1
       });
+    });
+  });
+
+  describe('subscription', () => {
+    let subLink;
+    before(() => {
+      subLink = new SubLink({
+        database: defaultApp.database()
+      });
+    });
+
+    it("should subscribe", (done) => {
+      const subQuery = gql`
+        subscription($ref: string) {
+          newArticle @rtdbSub(ref: $ref, event: "child_added") {
+            id @key
+            string
+          }
+        }
+      `;
+
+      const obs = execute(subLink, {
+        query: subQuery,
+        variables: {
+          ref: `${TEST_NAMESPACE}/testSub`
+        }
+      });
+      const callback = sinon.spy();
+      obs.subscribe(({data}) => {
+        callback();
+        expect(callback.calledOnce).to.be.true;
+        expect(data.newArticle).to.have.property("id");
+        expect(data.newArticle.string).to.be.equal("wwwy3y3");
+        done();
+      });
+
+      // push article
+      const mutation = gql`
+        fragment ArticleInput on firebase {
+          string: String
+        }
+
+        mutation($ref: string, $input: ProfileInput!) {
+          pushdata(input: $input) @rtdbPush(ref: $ref) {
+            id @pushKey
+          }
+        }
+      `;
+
+      makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query: mutation,
+          variables: {
+            ref: `${TEST_NAMESPACE}/testSub`,
+            input: {
+              string: "wwwy3y3"
+            }
+          }
+        })
+      );
     });
   });
 });
