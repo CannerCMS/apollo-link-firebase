@@ -1,8 +1,8 @@
 import { concat } from 'apollo-link';
 import RtdbQueryLink from './rtdb/link';
 import RtdbSubLink from './rtdb/subscriptionLink';
-import { database } from 'firebase';
+import { database as firebaseDatabase } from 'firebase';
 
-export const createRtdbLink = ({database}: {database: database.Database}) => {
+export const createRtdbLink = ({database}: {database: firebaseDatabase.Database}) => {
   return concat(new RtdbQueryLink({database}), new RtdbSubLink({database}));
-}
+};

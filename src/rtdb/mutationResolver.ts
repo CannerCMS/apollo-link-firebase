@@ -2,7 +2,6 @@ import { ExecInfo } from 'graphql-anywhere/lib/async';
 import { Resolver } from 'graphql-anywhere';
 import * as has from 'lodash/has';
 import * as last from 'lodash/last';
-import { database } from 'firebase';
 import { MutationResolverContext, MutationResolverRoot } from './types';
 
 const resolver: Resolver = async (
@@ -70,6 +69,6 @@ const resolver: Resolver = async (
   }
 
   return payload;
-}
+};
 
 export default resolver;

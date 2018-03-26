@@ -1,11 +1,11 @@
 import { ExecInfo } from 'graphql-anywhere/lib/async';
 import { Resolver } from 'graphql-anywhere';
-import { database } from 'firebase';
+import { database as firebaseDatabase } from 'firebase';
 import * as has from 'lodash/has';
 import { ResolverRoot, ResolverContext } from './types';
 import { createQuery } from './utils';
 
-const snapshotToArray = (snapshot: database.DataSnapshot, typename?: string): ResolverRoot[] => {
+const snapshotToArray = (snapshot: firebaseDatabase.DataSnapshot, typename?: string): ResolverRoot[] => {
   const ret = [];
   snapshot.forEach(childSnapshot => {
     ret.push({
@@ -15,7 +15,7 @@ const snapshotToArray = (snapshot: database.DataSnapshot, typename?: string): Re
     return false;
   });
   return ret;
-}
+};
 
 const queryResolver: Resolver = async (
   fieldName: string,
@@ -26,7 +26,8 @@ const queryResolver: Resolver = async (
 ) => {
   const { directives, isLeaf, resultKey } = info;
   const { database, exportVal } = context;
-  let {__snapshot: currentSnapshot, rootSnapshot} = root;
+  const {rootSnapshot} = root;
+  let currentSnapshot = root.__snapshot;
 
   if (isLeaf) {
     // default return is null, to avoid missing field error
@@ -82,7 +83,7 @@ const queryResolver: Resolver = async (
       ? snapshotToArray(currentSnapshot.child(resultKey), null)
       : {
         __snapshot: currentSnapshot.child(resultKey)
-      }; 
+      };
   }
 
   // type could be defined in different directives, @rtdbQuery, @rtdbSub...

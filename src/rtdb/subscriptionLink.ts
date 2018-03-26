@@ -1,20 +1,22 @@
 import { OperationTypeNode, FieldNode } from 'graphql';
 import { ApolloLink, Observable, FetchResult, Operation, NextLink } from 'apollo-link';
-import { hasDirectives, addTypenameToDocument, getMainDefinition, getFragmentDefinitions, getDirectiveInfoFromField } from 'apollo-utilities';
-import { database } from 'firebase';
+import {
+  hasDirectives, addTypenameToDocument, getMainDefinition, getFragmentDefinitions, getDirectiveInfoFromField
+} from 'apollo-utilities';
+import { database as firebaseDatabase } from 'firebase';
 import { graphql } from 'graphql-anywhere/lib/async';
 import { SubDirectiveArgs, ResolverContext, ResolverRoot } from './types';
 import { createQuery } from './utils';
 import queryResolver from './queryResolver';
 
 export default class RtdbSubLink extends ApolloLink {
-  database: database.Database;
-  constructor({database}: {database: database.Database}) {
+  private database: firebaseDatabase.Database;
+  constructor({database}: {database: firebaseDatabase.Database}) {
     super();
     this.database = database;
   }
 
-  request(operation: Operation, forward?: NextLink): Observable<FetchResult> {
+  public request(operation: Operation, forward?: NextLink): Observable<FetchResult> {
     const {query} = operation;
     const isRtdbQuery = hasDirectives(['rtdbSub'], query);
 
@@ -27,15 +29,15 @@ export default class RtdbSubLink extends ApolloLink {
 
     const context: ResolverContext = {
       database: this.database,
-      findType: (directives) =>
-        (directives.rtdbSub && directives.rtdbSub.type) ||
-        (directives.rtdbQuery && directives.rtdbQuery.type),
+      findType: fieldDirectives =>
+        (fieldDirectives.rtdbSub && fieldDirectives.rtdbSub.type) ||
+        (fieldDirectives.rtdbQuery && fieldDirectives.rtdbQuery.type),
       exportVal: {}
     };
 
     // Subscription operations must have exactly one root field.
     const onlyRootField: FieldNode = mainDefinition.selectionSet.selections[0];
-    
+
     // get directives
     const directives = getDirectiveInfoFromField(onlyRootField, operation.variables);
     const rtdbDirectives: SubDirectiveArgs = directives.rtdbSub as any;
@@ -48,7 +50,7 @@ export default class RtdbSubLink extends ApolloLink {
         directives: rtdbDirectives
       });
       const {event} = rtdbDirectives;
-      const callback = (snapshot: database.DataSnapshot) => {
+      const callback = (snapshot: firebaseDatabase.DataSnapshot) => {
         const root: ResolverRoot = {rootSnapshot: snapshot};
         graphql(
           queryResolver,
@@ -61,13 +63,15 @@ export default class RtdbSubLink extends ApolloLink {
           observer.next({ data });
         })
         .catch(err => {
-          if (err.name === 'AbortError') return;
+          if (err.name === 'AbortError') {
+            return;
+          }
           if (err.result && err.result.errors) {
             observer.next(err.result);
           }
           observer.error(err);
         });
-      }
+      };
 
       subQuery.on(event, callback);
       return () => subQuery.off(event, callback);

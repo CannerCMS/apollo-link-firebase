@@ -2,7 +2,7 @@ import { OperationTypeNode } from 'graphql';
 import { graphql, ExecInfo } from 'graphql-anywhere/lib/async';
 import { ApolloLink, Observable, FetchResult, Operation, NextLink } from 'apollo-link';
 import { hasDirectives, addTypenameToDocument, getMainDefinition, getFragmentDefinitions } from 'apollo-utilities';
-import { database } from 'firebase';
+import { database as firebaseDatabase } from 'firebase';
 import { Resolver } from 'graphql-anywhere';
 import { ResolverContext } from './types';
 import { createQuery } from './utils';
@@ -20,16 +20,16 @@ const getResolver = (operationType: string): Resolver => {
     default:
       throw new Error(`${operationType} not supported`);
   }
-}
+};
 
 export default class RtdbLink extends ApolloLink {
-  database: database.Database;
-  constructor({database}: {database: database.Database}) {
+  private database: firebaseDatabase.Database;
+  constructor({database}: {database: firebaseDatabase.Database}) {
     super();
     this.database = database;
   }
 
-  request(operation: Operation, forward?: NextLink): Observable<FetchResult> {
+  public request(operation: Operation, forward?: NextLink): Observable<FetchResult> {
     const {query} = operation;
     const isRtdbQuery = hasDirectives(['rtdbQuery', 'rtdbUpdate', 'rtdbSet', 'rtdbRemove', 'rtdbPush'], query);
 
@@ -45,7 +45,7 @@ export default class RtdbLink extends ApolloLink {
     // context for graphql-anywhere resolver
     const context: ResolverContext = {
       database: this.database,
-      findType: (directives) => directives.rtdbQuery.type,
+      findType: directives => directives.rtdbQuery.type,
       exportVal: {}
     };
 
@@ -65,7 +65,9 @@ export default class RtdbLink extends ApolloLink {
         observer.complete();
       })
       .catch(err => {
-        if (err.name === 'AbortError') return;
+        if (err.name === 'AbortError') {
+          return;
+        }
         if (err.result && err.result.errors) {
           observer.next(err.result);
         }

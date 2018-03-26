@@ -1,3 +1,4 @@
+// tslint:disable:no-unused-expression
 import { execute, makePromise, ApolloLink } from 'apollo-link';
 import * as chai from 'chai';
 import * as faker from 'faker';
@@ -16,23 +17,23 @@ import { database } from 'firebase';
 import * as sinon from 'sinon';
 const TEST_NAMESPACE = '__test__';
 
-type Result = { [index: string]: any };
+interface Result { [index: string]: any; }
 
 const cloneWithTypename = (data: any, typename: string | null = null) => {
   const customizer = (objectValue: any, srcValue: any) => {
     return (isPlainObject(srcValue))
       ? cloneWithTypename(srcValue, null)
       : srcValue;
-  }
+  };
 
   return (isArray(data))
     ? data.map(item => cloneWithTypename(item, typename))
     : assignWith({__typename: typename}, data, customizer);
-}
+};
 
 const mockArticles = (len: number) => {
   const fn = compose(
-    reduce((result, obj) => Object.assign({[obj.id]: omit(obj, 'id')}, result), {}),
+    reduce((result, obj) => ({[obj.id]: omit(obj, 'id'), ...result}), {}),
     times(((num: number) => {
       return {
         id: num,
@@ -47,12 +48,12 @@ const mockArticles = (len: number) => {
         },
         authors: {
           [num]: true,
-          [num+1]: true
+          [num + 1]: true
         },
         mainAuthor: num,
         authorsAsObject: {
           main: num,
-          second: num+1
+          second: num + 1
         },
         comments: {
           1: {
@@ -70,11 +71,11 @@ const mockArticles = (len: number) => {
   );
 
   return fn(len);
-}
+};
 
 const mockReviews = (len: number) => {
   const fn = compose(
-    reduce((result, obj) => Object.assign({[obj.id]: omit(obj, 'id')}, result), {}),
+    reduce((result, obj) => ({[obj.id]: omit(obj, 'id'), ...result}), {}),
     times(((num: number) => {
       return {
         id: num,
@@ -85,11 +86,11 @@ const mockReviews = (len: number) => {
   );
 
   return fn(len);
-}
+};
 
 const mockAuthors = (len: number) => {
   const fn = compose(
-    reduce((result, obj) => Object.assign({[obj.id]: omit(obj, 'id')}, result), {}),
+    reduce((result, obj) => ({[obj.id]: omit(obj, 'id'), ...result}), {}),
     times(((num: number) => {
       return {
         id: num,
@@ -99,7 +100,7 @@ const mockAuthors = (len: number) => {
   );
 
   return fn(len);
-}
+};
 
 describe('rtdbLink', () => {
   let defaultApp;
@@ -115,13 +116,13 @@ describe('rtdbLink', () => {
   after(async () => {
     await defaultApp.database().ref(TEST_NAMESPACE).remove();
     return defaultApp.delete();
-  })
+  });
 
   describe('query', () => {
     const object = {
       string: 'wwwy3y3',
       number: 1,
-    
+
       // object type
       nestedObject: {
         city: 'taipei',
@@ -326,7 +327,8 @@ describe('rtdbLink', () => {
             id @key @export
             count
             title
-            reviews @rtdbQuery(ref: $reviewRef, orderByChild: "articleId", equalTo: "$export$id", type: "Review") @array {
+            reviews
+              @rtdbQuery(ref: $reviewRef, orderByChild: "articleId", equalTo: "$export$id", type: "Review") @array {
               id @key
               content
             }
@@ -370,7 +372,7 @@ describe('rtdbLink', () => {
           query,
           variables: {
             ref: `${TEST_NAMESPACE}/articles`,
-            authorRef: ({exportVal}) => `${TEST_NAMESPACE}/authors/${exportVal.id}`  
+            authorRef: ({exportVal}) => `${TEST_NAMESPACE}/authors/${exportVal.id}`
           }
         }),
       );
@@ -446,7 +448,7 @@ describe('rtdbLink', () => {
           }
         }),
       );
-      
+
       expect(data.articles[0].mainAuthorData).to.be.eql({
         __typename: null,
         name: authors[0].name
@@ -595,7 +597,7 @@ describe('rtdbLink', () => {
           }
         })
       );
-      
+
       // read data
       const objectQuery = gql`
         query($ref: string) {
@@ -754,7 +756,7 @@ describe('rtdbLink', () => {
   describe('subscription', () => {
     let idAdded;
 
-    it('should subscribe using value event', (done) => {
+    it('should subscribe using value event', done => {
       const subQuery = gql`
         subscription($ref: string) {
           value @rtdbSub(ref: $ref, event: "value") {
@@ -809,7 +811,7 @@ describe('rtdbLink', () => {
       );
     });
 
-    it('should subscribe using child_added', (done) => {
+    it('should subscribe using child_added', done => {
       const subQuery = gql`
         subscription($ref: string) {
           newArticle @rtdbSub(ref: $ref, event: "child_added") {
@@ -863,7 +865,7 @@ describe('rtdbLink', () => {
       );
     });
 
-    it('should subscribe using child_changed', (done) => {
+    it('should subscribe using child_changed', done => {
       const subQuery = gql`
         subscription($ref: string) {
           subscribeUpdate @rtdbSub(ref: $ref, event: "child_changed") {
@@ -914,7 +916,7 @@ describe('rtdbLink', () => {
       );
     });
 
-    it('should subscribe using child_removed', (done) => {
+    it('should subscribe using child_removed', done => {
       const subQuery = gql`
         subscription($ref: string) {
           subscribeRemoved @rtdbSub(ref: $ref, event: "child_removed") {

@@ -1,23 +1,32 @@
-import { database } from "firebase";
-import * as mapValues from "lodash/mapValues";
-import * as trimStart from "lodash/trimStart";
-import * as isFunction from "lodash/isFunction";
-import * as isUndefined from "lodash/isUndefined";
-import { DirectiveArgs } from "./types";
+import { database as firebaseDatabase } from 'firebase';
+import * as mapValues from 'lodash/mapValues';
+import * as trimStart from 'lodash/trimStart';
+import * as isFunction from 'lodash/isFunction';
+import * as isUndefined from 'lodash/isUndefined';
+import { DirectiveArgs } from './types';
 
-export const createQuery = ({database, directives, exportVal, snapshot}: {database: database.Database, directives: DirectiveArgs, exportVal?: any, snapshot?: database.DataSnapshot}): database.Query => {
+export const createQuery = ({
+  database, directives, exportVal, snapshot
+}: {
+  database: firebaseDatabase.Database,
+  directives: DirectiveArgs,
+  exportVal?: any,
+  snapshot?: firebaseDatabase.DataSnapshot
+}): firebaseDatabase.Query => {
   directives = mapValues(directives, val => {
     // customizer
-    if (isFunction(val))
+    if (isFunction(val)) {
       return val({root: snapshot, exportVal});
+    }
 
     // replace $export$field
-    if (val.startsWith && val.startsWith("$export$"))
-      return exportVal[trimStart(val, "$export$")];
+    if (val.startsWith && val.startsWith('$export$')) {
+      return exportVal[trimStart(val, '$export$')];
+    }
     return val;
   });
 
-  let query: database.Query | database.Reference = database.ref(directives.ref);
+  let query: firebaseDatabase.Query | firebaseDatabase.Reference = database.ref(directives.ref);
 
   // orderBy
   if (directives.orderByChild) {
