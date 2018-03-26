@@ -145,10 +145,11 @@ describe('rtdbLink', () => {
       const objectQuery = gql`
         query($ref: string) {
           object @rtdbQuery(ref: $ref, type: "object") {
-            string,
-            number,
+            id @key
+            string
+            number
             nestedObject {
-              city,
+              city
               address
             }
           }
@@ -162,7 +163,10 @@ describe('rtdbLink', () => {
           variables: {ref: `${TEST_NAMESPACE}/object`}
         }),
       );
-      expect(data.object).to.be.eql(cloneWithTypename(object, 'object'));
+      expect(data.object).to.be.eql({
+        id: 'object',
+        ...cloneWithTypename(object, 'object')
+      });
     });
 
     it('should query object with fields not exist', async () => {
