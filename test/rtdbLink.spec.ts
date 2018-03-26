@@ -1,21 +1,21 @@
 import { execute, makePromise, ApolloLink } from 'apollo-link';
-import * as chai from "chai";
-import * as faker from "faker";
-import * as isArray from "lodash/isArray";
-import * as isPlainObject from "lodash/isPlainObject";
-import * as assignWith from "lodash/assignWith";
-import * as times from "lodash/fp/times";
-import * as reduce from "lodash/fp/reduce";
-import * as compose from "lodash/fp/compose";
-import * as omit from "lodash/omit";
+import * as chai from 'chai';
+import * as faker from 'faker';
+import * as isArray from 'lodash/isArray';
+import * as isPlainObject from 'lodash/isPlainObject';
+import * as assignWith from 'lodash/assignWith';
+import * as times from 'lodash/fp/times';
+import * as reduce from 'lodash/fp/reduce';
+import * as compose from 'lodash/fp/compose';
+import * as omit from 'lodash/omit';
 const expect = chai.expect;
-import { initialize } from "./database";
+import { initialize } from './database';
 import gql from 'graphql-tag';
 import RtdbLink from '../src/rtdb/link';
 import SubLink from '../src/rtdb/subscriptionLink';
 import { database } from 'firebase';
 import * as sinon from 'sinon';
-const TEST_NAMESPACE = "__test__";
+const TEST_NAMESPACE = '__test__';
 
 type Result = { [index: string]: any };
 
@@ -33,7 +33,7 @@ const cloneWithTypename = (data: any, typename: string | null = null) => {
 
 const mockArticles = (len: number) => {
   const fn = compose(
-    reduce((result, obj) => Object.assign({[obj.id]: omit(obj, "id")}, result), {}),
+    reduce((result, obj) => Object.assign({[obj.id]: omit(obj, 'id')}, result), {}),
     times(((num: number) => {
       return {
         id: num,
@@ -75,11 +75,11 @@ const mockArticles = (len: number) => {
 
 const mockReviews = (len: number) => {
   const fn = compose(
-    reduce((result, obj) => Object.assign({[obj.id]: omit(obj, "id")}, result), {}),
+    reduce((result, obj) => Object.assign({[obj.id]: omit(obj, 'id')}, result), {}),
     times(((num: number) => {
       return {
         id: num,
-        articleId: "1",
+        articleId: '1',
         content: faker.lorem.words(10)
       };
     }))
@@ -90,7 +90,7 @@ const mockReviews = (len: number) => {
 
 const mockAuthors = (len: number) => {
   const fn = compose(
-    reduce((result, obj) => Object.assign({[obj.id]: omit(obj, "id")}, result), {}),
+    reduce((result, obj) => Object.assign({[obj.id]: omit(obj, 'id')}, result), {}),
     times(((num: number) => {
       return {
         id: num,
@@ -120,13 +120,13 @@ describe('rtdbLink', () => {
 
   describe('query', () => {
     const object = {
-      string: "wwwy3y3",
+      string: 'wwwy3y3',
       number: 1,
     
       // object type
       nestedObject: {
-        city: "taipei",
-        address: "Fuyuan street"
+        city: 'taipei',
+        address: 'Fuyuan street'
       }
     };
     const ARTICLE_LEN = 5;
@@ -287,7 +287,7 @@ describe('rtdbLink', () => {
       expect(data.articles[0].comments.length).to.be.equal(3);
       expect(data.articles[0].comments[0]).to.be.eql({
         __typename: null,
-        id: "1",
+        id: '1',
         ...articles[0].comments[1]
       });
     });
@@ -374,7 +374,7 @@ describe('rtdbLink', () => {
       );
       expect(data.articles[0].authors[0]).to.be.eql({
         __typename: null,
-        id: "0",
+        id: '0',
         info: {
           __typename: null,
           name: authors[0].name
@@ -382,7 +382,7 @@ describe('rtdbLink', () => {
       });
       expect(data.articles[0].authors[1]).to.be.eql({
         __typename: null,
-        id: "1",
+        id: '1',
         info: {
           __typename: null,
           name: authors[1].name
@@ -391,7 +391,7 @@ describe('rtdbLink', () => {
 
       expect(data.articles[1].authors[0]).to.be.eql({
         __typename: null,
-        id: "1",
+        id: '1',
         info: {
           __typename: null,
           name: authors[1].name
@@ -399,7 +399,7 @@ describe('rtdbLink', () => {
       });
       expect(data.articles[1].authors[1]).to.be.eql({
         __typename: null,
-        id: "2",
+        id: '2',
         info: {
           __typename: null,
           name: authors[2].name
@@ -461,6 +461,43 @@ describe('rtdbLink', () => {
   });
 
   describe('mutation', () => {
+    it('should update and get id', async () => {
+      const mutation = gql`
+        fragment Input on firebase {
+          string: String
+          number: Number
+        }
+
+        mutation($ref: string, $input: Input!) {
+          updateArticle(input: $input) @rtdbUpdate(ref: $ref, type: "Article") {
+            id @key
+            string
+            number
+          }
+        }
+      `;
+
+      const {data} = await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query: mutation,
+          variables: {
+            ref: `${TEST_NAMESPACE}/array/articleId`,
+            input: {
+              string: 'wwwy3y32',
+              number: 3
+            }
+          }
+        }),
+      );
+      expect(data.updateArticle).to.be.eql({
+        id: 'articleId',
+        string: 'wwwy3y32',
+        number: 3,
+        __typename: 'Article'
+      });
+    });
+
     it('should update object', async () => {
       const mutation = gql`
         fragment ProfileInput on firebase {
@@ -469,24 +506,31 @@ describe('rtdbLink', () => {
         }
 
         mutation($ref: string, $input: ProfileInput!) {
-          updateProfile(input: $input) @rtdbUpdate(ref: $ref)
+          updateProfile(input: $input) @rtdbUpdate(ref: $ref, type: "Profile") {
+            string
+            number
+          }
         }
       `;
 
-      await makePromise<Result>(
+      const {data: mutationData} = await makePromise<Result>(
         execute(link, {
           operationName: 'query',
           query: mutation,
           variables: {
             ref: `${TEST_NAMESPACE}/object`,
             input: {
-              string: "wwwy3y32",
+              string: 'wwwy3y32',
               number: 3
             }
           }
         }),
       );
-      
+      expect(mutationData.updateProfile).to.be.eql({
+        string: 'wwwy3y32',
+        number: 3,
+        __typename: 'Profile'
+      });
       // read data
       const objectQuery = gql`
         query($ref: string) {
@@ -510,11 +554,11 @@ describe('rtdbLink', () => {
       );
       expect(data.object).to.be.eql({
         __typename: null,
-        string: "wwwy3y32",
+        string: 'wwwy3y32',
         number: 3,
         nestedObject: {
-          city: "taipei",
-          address: "Fuyuan street",
+          city: 'taipei',
+          address: 'Fuyuan street',
           __typename: null
         }
       });
@@ -539,11 +583,11 @@ describe('rtdbLink', () => {
           variables: {
             ref: `${TEST_NAMESPACE}/newObject`,
             input: {
-              string: "wwwy3y32",
+              string: 'wwwy3y32',
               number: 3,
               nestedObject: {
-                city: "taipei",
-                address: "Fuyuan street"
+                city: 'taipei',
+                address: 'Fuyuan street'
               }
             }
           }
@@ -573,11 +617,11 @@ describe('rtdbLink', () => {
       );
       expect(data.object).to.be.eql({
         __typename: null,
-        string: "wwwy3y32",
+        string: 'wwwy3y32',
         number: 3,
         nestedObject: {
-          city: "taipei",
-          address: "Fuyuan street",
+          city: 'taipei',
+          address: 'Fuyuan street',
           __typename: null
         }
       });
@@ -602,7 +646,7 @@ describe('rtdbLink', () => {
           variables: {
             ref: `${TEST_NAMESPACE}/forDelete`,
             input: {
-              string: "wwwy3y32"
+              string: 'wwwy3y32'
             }
           }
         })
@@ -669,14 +713,14 @@ describe('rtdbLink', () => {
           variables: {
             ref: `${TEST_NAMESPACE}/array`,
             input: {
-              string: "wwwy3y3",
+              string: 'wwwy3y3',
               number: 1
             }
           }
         })
       );
 
-      expect(pushdata).to.have.property("id");
+      expect(pushdata).to.have.property('id');
       expect(pushdata.field).to.be.null;
 
       // read data
@@ -699,7 +743,7 @@ describe('rtdbLink', () => {
 
       expect(data.object).to.be.eql({
         __typename: null,
-        string: "wwwy3y3",
+        string: 'wwwy3y3',
         number: 1
       });
     });
@@ -715,7 +759,7 @@ describe('rtdbLink', () => {
       });
     });
 
-    it("should subscribe using value event", (done) => {
+    it('should subscribe using value event', (done) => {
       const subQuery = gql`
         subscription($ref: string) {
           value @rtdbSub(ref: $ref, event: "value") {
@@ -736,7 +780,7 @@ describe('rtdbLink', () => {
       const subscription = obs.subscribe(({data}) => {
         callback();
         expect(callback.calledOnce).to.be.true;
-        expect(data.value.field.nestedField).to.be.equal("wwwy3y3");
+        expect(data.value.field.nestedField).to.be.equal('wwwy3y3');
         subscription.unsubscribe();
         done();
       });
@@ -762,7 +806,7 @@ describe('rtdbLink', () => {
             ref: `${TEST_NAMESPACE}/testSubValue`,
             input: {
               field: {
-                nestedField: "wwwy3y3"
+                nestedField: 'wwwy3y3'
               }
             }
           }
@@ -770,7 +814,7 @@ describe('rtdbLink', () => {
       );
     });
 
-    it("should subscribe using child_added", (done) => {
+    it('should subscribe using child_added', (done) => {
       const subQuery = gql`
         subscription($ref: string) {
           newArticle @rtdbSub(ref: $ref, event: "child_added") {
@@ -791,8 +835,8 @@ describe('rtdbLink', () => {
         callback();
         idAdded = data.newArticle.id;
         expect(callback.calledOnce).to.be.true;
-        expect(data.newArticle).to.have.property("id");
-        expect(data.newArticle.string).to.be.equal("wwwy3y3");
+        expect(data.newArticle).to.have.property('id');
+        expect(data.newArticle.string).to.be.equal('wwwy3y3');
         subscription.unsubscribe();
         done();
       });
@@ -817,14 +861,14 @@ describe('rtdbLink', () => {
           variables: {
             ref: `${TEST_NAMESPACE}/testSub`,
             input: {
-              string: "wwwy3y3"
+              string: 'wwwy3y3'
             }
           }
         })
       );
     });
 
-    it("should subscribe using child_changed", (done) => {
+    it('should subscribe using child_changed', (done) => {
       const subQuery = gql`
         subscription($ref: string) {
           subscribeUpdate @rtdbSub(ref: $ref, event: "child_changed") {
@@ -845,7 +889,7 @@ describe('rtdbLink', () => {
         callback();
         expect(callback.calledOnce).to.be.true;
         expect(data.subscribeUpdate.id).to.be.equal(idAdded);
-        expect(data.subscribeUpdate.string).to.be.equal("wwwy3y32");
+        expect(data.subscribeUpdate.string).to.be.equal('wwwy3y32');
         subscription.unsubscribe();
         done();
       });
@@ -868,14 +912,14 @@ describe('rtdbLink', () => {
           variables: {
             ref: `${TEST_NAMESPACE}/testSub/${idAdded}`,
             input: {
-              string: "wwwy3y32"
+              string: 'wwwy3y32'
             }
           }
         })
       );
     });
 
-    it("should subscribe using child_removed", (done) => {
+    it('should subscribe using child_removed', (done) => {
       const subQuery = gql`
         subscription($ref: string) {
           subscribeRemoved @rtdbSub(ref: $ref, event: "child_removed") {
