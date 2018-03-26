@@ -16,7 +16,7 @@ Currently, we support features below:
 * [Installation](#installation)
 * [Quickstart](#quickstart)
 * [Retrieve Object Data](#retrieve-object-data)
-* [Working With Lists of Data](#working-with-lists-of-data)
+* [Work With Lists of Data](#work-with-lists-of-data)
 * [Mutation](#mutation)
 * [Subscription](#subscription)
 
