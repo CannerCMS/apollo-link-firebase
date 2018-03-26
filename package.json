@@ -1,7 +1,7 @@
 {
   "name": "apollo-link-firebase",
   "version": "0.0.1",
-  "description": "apollo link firebase",
+  "description": "Query Firebase in GraphQL with Apollo",
   "author": {
     "name": "wwwy3y3",
     "email": "wwwy3y3@gmail.com"
