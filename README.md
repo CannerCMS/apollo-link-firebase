@@ -88,7 +88,7 @@ const query = gql`
 ```
 
 ## Work with Lists of Data
-Say your data in firebase is like
+For example, your data in firebase could be like
 ``` js
 {
   users: {
@@ -155,8 +155,20 @@ const query = gql`
 }]
 ```
 
+### rtdbQuery Directive Arguments
+* `ref`: string
+* `orderByChild`: string
+* `orderByKey`: boolean. e,g `orderByKey: true`
+* `orderByValue`: boolean
+* `startAt`: any
+* `endAt`: any
+* `equalTo`: any
+* `limitToFirst`: number
+* `limitToLast`: number
+
 ### More Examples
-More query examples including how to  deal with nested array strucure, join different path ...etc, are demonstrated at [Query wiki section](https://github.com/Canner/apollo-link-firebase/wiki#query)
+* [Basic API Usage](https://github.com/Canner/apollo-link-firebase/wiki/Simple-Query-Example) (orderBy*, limitTo*...)
+* [Advanced API Usage](https://github.com/Canner/apollo-link-firebase/wiki/Advance-Query) (nested array, data join...)
 
 ## Mutation
 We only take payload from `input` key from the recommendations in this [article](https://dev-blog.apollodata.com/designing-graphql-mutations-e09de826ed97)
