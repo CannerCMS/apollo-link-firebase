@@ -7,10 +7,10 @@ apollo-link-firebase provides you a simple way to query Firebase in graphQL with
 
 Currently, we support features below:
 
-1. **Query**: All sorting and filterin gmethods on [document](https://firebase.google.com/docs/database/web/lists-of-data#sorting_and_filtering_data) are supported.
+1. **Query**: All sorting and filtering methods on [document](https://firebase.google.com/docs/database/web/lists-of-data#sorting_and_filtering_data) are supported.
 1. **Mutation**: deal with `set`, `update`, `remove` methods with graphQL mutation.
 1. **Realtime Subscription**: Listen to your [firebase events](https://firebase.google.com/docs/database/web/lists-of-data#listen_for_child_events) using graphQL Subscription.
-1. **Data Join**: Retrieve your data from different paths using **One graphQL**.
+1. **Data Join**: Retrieve your data from different paths using **one graphQL**.
 
 ## Contents
 * [Installation](#installation)
@@ -241,21 +241,24 @@ const variables = {
 
 ## Subscription
 We support four events in firebase, more on [firebase document](https://firebase.google.com/docs/database/web/lists-of-data?authuser=0#listen_for_child_events)
+
+You can use all the query api supported in `@rtdbQuery`, more advanced query examples in [wiki](https://github.com/Canner/apollo-link-firebase/wiki/Advance-Query)
 ### Usage
 ``` js
 const subQuery = gql`
-  subscription($ref: string) {
-    value @rtdbSub(ref: $ref, event: "value") {
-      field
+  subscription {
+    newComment @rtdbSub(ref: "/comments", event: "value") {
+      id @key
+      content
     }
   }
 `;
 ```
 ### Directives
-* value: use `@rtdbSub(ref: string, event: "value")`
-* child_added: use `@rtdbSub(ref: string, event: "child_added")`
-* child_changed: use `@rtdbSub(ref: string, event: "child_changed")`
-* child_removed: use `@rtdbSub(ref: string, event: "child_removed")`
+* `value`: `@rtdbSub(ref: string, event: "value")`
+* `child_added`: `@rtdbSub(ref: string, event: "child_added")`
+* `child_changed`: `@rtdbSub(ref: string, event: "child_changed")`
+* `child_removed`: `@rtdbSub(ref: string, event: "child_removed")`
 
 ## Roadmap
 * support firebase transaction
