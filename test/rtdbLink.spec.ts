@@ -22,7 +22,7 @@ type Result = { [index: string]: any };
 const cloneWithTypename = (data: any, typename: string | null = null) => {
   const customizer = (objectValue: any, srcValue: any) => {
     return (isPlainObject(srcValue))
-      ? cloneWithTypename(srcValue, typename)
+      ? cloneWithTypename(srcValue, null)
       : srcValue;
   }
 
@@ -144,7 +144,7 @@ describe('rtdbLink', () => {
     it('should query object', async () => {
       const objectQuery = gql`
         query($ref: string) {
-          object @rtdbQuery(ref: $ref) {
+          object @rtdbQuery(ref: $ref, type: "object") {
             string,
             number,
             nestedObject {
@@ -162,7 +162,7 @@ describe('rtdbLink', () => {
           variables: {ref: `${TEST_NAMESPACE}/object`}
         }),
       );
-      expect(data.object).to.be.eql(cloneWithTypename(object));
+      expect(data.object).to.be.eql(cloneWithTypename(object, 'object'));
     });
 
     it('should query object with fields not exist', async () => {
@@ -195,7 +195,7 @@ describe('rtdbLink', () => {
     it('should query array', async () => {
       const query = gql`
         query($ref: string) {
-          articles @rtdbQuery(ref: $ref) @array {
+          articles @rtdbQuery(ref: $ref, type: "Article") @array {
             id @key
             count,
             title,
@@ -214,6 +214,7 @@ describe('rtdbLink', () => {
         }),
       );
       expect(data.articles.length).to.be.equal(ARTICLE_LEN);
+      expect(data.articles[0].__typename).to.be.equal('Article');
       expect(data.articles[0].count).to.be.equal(articles[0].count);
       expect(data.articles[0].title).to.be.equal(articles[0].title);
       expect(data.articles[0].nested).to.be.eql(cloneWithTypename(articles[0].nested));
@@ -322,11 +323,11 @@ describe('rtdbLink', () => {
     it('should query relation data with root value', async () => {
       const query = gql`
         query($ref: string, $reviewRef: string) {
-          articles @rtdbQuery(ref: $ref) @array {
+          articles @rtdbQuery(ref: $ref, type: "Article") @array {
             id @key @export
             count
             title
-            reviews @rtdbQuery(ref: $reviewRef, orderByChild: "articleId", equalTo: "$export$id") @array {
+            reviews @rtdbQuery(ref: $reviewRef, orderByChild: "articleId", equalTo: "$export$id", type: "Review") @array {
               id @key
               content
             }
@@ -342,7 +343,9 @@ describe('rtdbLink', () => {
         }),
       );
       expect(data.articles[0].reviews.length).to.be.equal(0);
+      expect(data.articles[0].__typename).to.be.equal('Article');
       expect(data.articles[1].reviews.length).to.be.equal(3);
+      expect(data.articles[1].reviews[0].__typename).to.be.equal('Review');
     });
 
     it('should query relation data in nested array', async () => {

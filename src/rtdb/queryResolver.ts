@@ -32,6 +32,11 @@ const queryResolver: Resolver = async (
     // default return is null, to avoid missing field error
     let leafReturn: any = null;
 
+    // typename
+    if (resultKey === '__typename') {
+      return root.__typename || null;
+    }
+
     // dealing with different directives
     if (has(directives, 'key')) {
       // leaf with @key, e.g id: ID @key
