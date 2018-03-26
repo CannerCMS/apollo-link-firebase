@@ -65,7 +65,6 @@ export default class RtdbLink extends ApolloLink {
         observer.complete();
       })
       .catch(err => {
-        console.log(err);
         if (err.name === 'AbortError') return;
         if (err.result && err.result.errors) {
           observer.next(err.result);

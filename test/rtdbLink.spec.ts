@@ -11,8 +11,7 @@ import * as omit from 'lodash/omit';
 const expect = chai.expect;
 import { initialize } from './database';
 import gql from 'graphql-tag';
-import RtdbLink from '../src/rtdb/link';
-import SubLink from '../src/rtdb/subscriptionLink';
+import { createRtdbLink } from '../src';
 import { database } from 'firebase';
 import * as sinon from 'sinon';
 const TEST_NAMESPACE = '__test__';
@@ -104,11 +103,11 @@ const mockAuthors = (len: number) => {
 
 describe('rtdbLink', () => {
   let defaultApp;
-  let link: RtdbLink;
+  let link: ApolloLink;
   before(async () => {
     // setup data
     defaultApp = await initialize();
-    link = new RtdbLink({
+    link = createRtdbLink({
       database: defaultApp.database()
     });
   });
@@ -753,14 +752,7 @@ describe('rtdbLink', () => {
   });
 
   describe('subscription', () => {
-    let subLink;
     let idAdded;
-
-    before(() => {
-      subLink = new SubLink({
-        database: defaultApp.database()
-      });
-    });
 
     it('should subscribe using value event', (done) => {
       const subQuery = gql`
@@ -773,7 +765,7 @@ describe('rtdbLink', () => {
         }
       `;
 
-      const obs = execute(subLink, {
+      const obs = execute(link, {
         query: subQuery,
         variables: {
           ref: `${TEST_NAMESPACE}/testSubValue`
@@ -827,7 +819,7 @@ describe('rtdbLink', () => {
         }
       `;
 
-      const obs = execute(subLink, {
+      const obs = execute(link, {
         query: subQuery,
         variables: {
           ref: `${TEST_NAMESPACE}/testSub`
@@ -881,7 +873,7 @@ describe('rtdbLink', () => {
         }
       `;
 
-      const obs = execute(subLink, {
+      const obs = execute(link, {
         query: subQuery,
         variables: {
           ref: `${TEST_NAMESPACE}/testSub`
@@ -931,7 +923,7 @@ describe('rtdbLink', () => {
         }
       `;
 
-      const obs = execute(subLink, {
+      const obs = execute(link, {
         query: subQuery,
         variables: {
           ref: `${TEST_NAMESPACE}/testSub`
