@@ -1,16 +1,22 @@
+/**
+ * build umd version
+ */
 const path = require('path');
 
 module.exports = {
+  mode: 'production',
   entry: {
-    index: './docs/index.tsx'
+    index: './src/index.ts'
   },
-  devServer: {
-    contentBase: path.join(__dirname, "docs")
-  },
+  devtool: 'source-map',
   output: {
-    path: path.join(__dirname, 'dist'),
-    filename: '[name].js',
-    publicPath: '/docs/static/'
+    path: path.join(__dirname, 'lib'),
+    filename: 'bundle.umd.js',
+    library: "apollo-link-firebase",
+    libraryTarget: "umd"
+  },
+  resolve: {
+    extensions: ['.js', '.ts', '.tsx']
   },
   module: {
     rules: [
@@ -18,19 +24,14 @@ module.exports = {
         test: /\.tsx?$/,
         exclude: /node_modules/,
         use: {
-          loader: 'ts-loader'
-        }
-      },
-      {
-        test: /\.css$/,
-        use: [
-          {
-            loader: 'style-loader'
-          },
-          {
-            loader: 'css-loader'
+          loader: 'ts-loader',
+          options: {
+            configFile: 'tsconfig.release.json',
+            compilerOptions: {
+              declaration: false
+            }
           }
-        ]
+        }
       }
     ]
   }

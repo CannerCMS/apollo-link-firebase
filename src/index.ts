@@ -1,4 +1,4 @@
-import { concat } from 'apollo-link';
+import { concat, ApolloLink } from 'apollo-link';
 import RtdbQueryLink from './rtdb/link';
 import RtdbSubLink from './rtdb/subscriptionLink';
 import { database as firebaseDatabase } from 'firebase';

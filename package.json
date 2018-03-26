@@ -9,7 +9,10 @@
   "files": [
     "lib"
   ],
-  "main": "lib/index.js",
+  "main": "lib/bundle.umd.js",
+  "module": "./lib/index.js",
+  "jsnext:main": "./lib/index.js",
+  "typings": "./lib/index.d.ts",
   "keywords": [
     "apollo",
     "apollo-link",
@@ -18,11 +21,13 @@
   ],
   "scripts": {
     "lint": "tslint -c tslint.json src/**/*.ts",
+    "bundle": "./node_modules/.bin/webpack --config webpack.config.prod.js",
     "test": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' mocha --timeout 10000 --compilers ts:ts-node/register --recursive --exit \"test/**/*.spec.ts\"",
-    "clean": "rimraf lib dist",
-    "build": "webpack -p --progress --colors",
-    "start": "./node_modules/.bin/webpack-dev-server --config webpack.config.dev.js --mode development",
-    "build:docs": "./node_modules/.bin/webpack --config webpack.config.prod.js --mode production"
+    "clean": "rimraf lib",
+    "prebuild": "npm run clean",
+    "build": "tsc -p ./tsconfig.release.json --pretty",
+    "postbuild": "npm run bundle",
+    "start": "./node_modules/.bin/webpack-dev-server --config webpack.config.dev.js --mode development"
   },
   "devDependencies": {
     "@types/chai": "^4.1.2",
@@ -67,10 +72,6 @@
     "webpack-dev-server": "^3.1.0"
   },
   "repository": "Canner/apollo-link-firebase",
-  "peerDependencies": {
-    "react": "^0.14.0 || ^15.0.0 || 16.x",
-    "react-dom": "^0.14.0 || ^15.0.0 || 16.x"
-  },
   "license": "MIT",
   "dependencies": {
     "firebase": "^4.11.0"

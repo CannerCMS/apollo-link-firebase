@@ -7,7 +7,7 @@
     "jsx": "react",
     "removeComments": true,
     "sourceMap": true,
-    "outDir": "lib",
+    "declaration": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "skipLibCheck": true,
