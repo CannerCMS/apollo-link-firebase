@@ -27,6 +27,7 @@
     "prebuild": "npm run clean",
     "build": "tsc -p ./tsconfig.release.json --pretty",
     "postbuild": "npm run bundle",
+    "prepublishOnly": "npm run clean && npm run build",
     "start": "./node_modules/.bin/webpack-dev-server --config webpack.config.dev.js --mode development"
   },
   "devDependencies": {
@@ -46,7 +47,6 @@
     "apollo-link-schema": "^1.0.6",
     "apollo-utilities": "^1.0.9",
     "chai": "^4.1.2",
-    "css-loader": "^0.28.10",
     "faker": "^4.1.0",
     "graphql": "0.13.0",
     "graphql-anywhere": "^4.1.6",
@@ -61,7 +61,6 @@
     "react-dom": "^16.2.0",
     "rimraf": "^2.5.4",
     "sinon": "^4.4.8",
-    "style-loader": "^0.20.2",
     "ts-loader": "^4.0.0",
     "ts-node": "^5.0.1",
     "tslint": "^5.9.1",

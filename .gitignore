@@ -3,3 +3,4 @@ coverage
 npm-debug.log
 lib
 yarn-error.log
+.DS_Store
