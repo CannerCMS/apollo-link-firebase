@@ -1,0 +1,43 @@
+{
+  "name": "apollo-link-firebase-example",
+  "version": "0.0.1",
+  "description": "Query Firebase in GraphQL with Apollo",
+  "scripts": {
+    "start": "./node_modules/.bin/webpack-dev-server --config webpack.config.dev.js --mode development"
+  },
+  "devDependencies": {
+    "@types/node": "9.4.6",
+    "@types/react": "16.0.40",
+    "@types/react-dom": "16.0.4",
+    "@types/webpack": "3.8.8",
+    "@types/webpack-env": "1.13.5",
+    "antd": "^3.2.3",
+    "apollo-cache-inmemory": "^1.1.9",
+    "apollo-client": "^2.2.7",
+    "apollo-link": "^1.2.1",
+    "apollo-link-firebase": "^1.0.1",
+    "apollo-utilities": "^1.0.9",
+    "css-loader": "^0.28.10",
+    "graphql": "0.13.0",
+    "graphql-tag": "^2.8.0",
+    "graphql-tools": "^2.21.0",
+    "lodash": "^4.17.5",
+    "react": "^16.2.0",
+    "react-addons-test-utils": "^15.3.1",
+    "react-apollo": "2.1.0-rc.1",
+    "react-dom": "^16.2.0",
+    "rimraf": "^2.5.4",
+    "style-loader": "^0.20.2",
+    "ts-loader": "^4.0.0",
+    "ts-node": "^5.0.1",
+    "tslint": "^5.9.1",
+    "tslint-react": "^3.5.1",
+    "typescript": "^2.7.2",
+    "webpack": "^4.0.1",
+    "webpack-cli": "^2.0.10",
+    "webpack-dev-server": "^3.1.0"
+  },
+  "dependencies": {
+    "firebase": "^4.12.0"
+  }
+}
