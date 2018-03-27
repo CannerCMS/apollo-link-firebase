@@ -14,10 +14,10 @@ const resolver: Resolver = async (
   const { resultKey, directives, isLeaf } = info;
   const { database } = context;
 
-  // only used when rtdbPush need to know the generated pushKey
-  if (isLeaf && root && root.__snapshot) {
-    const snapshot = root.__snapshot;
-    return has(directives, 'pushKey') ? snapshot.key : null;
+  // used when rtdbPush need to know the generated pushKey
+  // also fields return in @rtdbPush payload
+  if (isLeaf && has(directives, 'pushKey')) {
+    return root.__pushKey;
   }
 
   // slice key from ref
@@ -63,7 +63,8 @@ const resolver: Resolver = async (
     const newRef = database.ref(ref).push();
     await newRef.set(payload);
     return {
-      __snapshot: newRef,
+      payload,
+      __pushKey: newRef.key,
       __typename: type
     };
   }

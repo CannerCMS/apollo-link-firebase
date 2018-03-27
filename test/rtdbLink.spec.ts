@@ -709,6 +709,8 @@ describe('rtdbLink', () => {
         mutation($ref: string, $input: ProfileInput!) {
           pushdata(input: $input) @rtdbPush(ref: $ref) {
             id @pushKey
+            string
+            number
             field
           }
         }
@@ -729,6 +731,8 @@ describe('rtdbLink', () => {
       );
 
       expect(pushdata).to.have.property('id');
+      expect(pushdata.string).to.be.equal('wwwy3y3');
+      expect(pushdata.number).to.be.equal(1);
       expect(pushdata.field).to.be.null;
 
       // read data
@@ -851,6 +855,7 @@ describe('rtdbLink', () => {
         mutation($ref: string, $input: ProfileInput!) {
           pushdata(input: $input) @rtdbPush(ref: $ref) {
             id @pushKey
+            string
           }
         }
       `;

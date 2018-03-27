@@ -19,7 +19,7 @@ export interface ResolverRoot {
 
 export interface MutationResolverRoot {
   __typename?: string;
-  __snapshot?: database.DataSnapshot;
+  __pushKey?: string;
   payload?: any;
 }
 
