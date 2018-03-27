@@ -9,7 +9,7 @@ Currently, we support features below:
 
 1. **Query**: All sorting and filtering methods on [document](https://firebase.google.com/docs/database/web/lists-of-data#sorting_and_filtering_data) are supported.
 1. **Mutation**: deal with `set`, `update`, `remove` methods with graphQL mutation.
-1. **Realtime Subscription**: Listen to your [firebase events](https://firebase.google.com/docs/database/web/lists-of-data#listen_for_child_events) using graphQL Subscription.
+1. **Realtime Subscription**: Listen to your [Firebase events](https://firebase.google.com/docs/database/web/lists-of-data#listen_for_child_events) using graphQL Subscription.
 1. **Data Join**: Retrieve your data from different paths using **one graphQL**.
 
 ## Contents
@@ -65,7 +65,7 @@ client.query({ query }).then(response => {
 
 ## Retrieve Object Data
 ### Return with __typename
-In Apollo client, `InMemoryCache` use __typename and id to save your data in store.
+In Apollo client, `InMemoryCache` use `__typename` and `id` to save your data in store.
 
 Using `@key` directive, you can speficy which field you want to return with the [key of snapshot](https://firebase.google.com/docs/reference/js/firebase.database.DataSnapshot?authuser=0#key)
 ``` js
@@ -88,7 +88,7 @@ const query = gql`
 ```
 
 ## Work with Lists of Data
-For example, your data in firebase could be like
+For example, your data in Firebase could be like
 ``` js
 {
   users: {
@@ -132,7 +132,7 @@ const query = gql`
 ```
 
 ### Advance Query
-In firebase js sdk, We can get data by using [sorting and filtering API](https://firebase.google.com/docs/database/web/lists-of-data#sorting_and_filtering_data)
+In firebase client js sdk, We can get data by using [sorting and filtering API](https://firebase.google.com/docs/database/web/lists-of-data#sorting_and_filtering_data)
 
 We provide corresponding API in `@rtdbQuery` directive arguments. In the following example, we query lists of data using `orderByChild("birth")` and `limitToFirst(1)`
 ``` js
@@ -240,7 +240,7 @@ const variables = {
 ```
 
 ## Subscription
-We support four events in firebase, more on [firebase document](https://firebase.google.com/docs/database/web/lists-of-data?authuser=0#listen_for_child_events)
+We support four events in Firebase, more on [Firebase document](https://firebase.google.com/docs/database/web/lists-of-data?authuser=0#listen_for_child_events)
 
 You can use all the query api supported in `@rtdbQuery`, more advanced query examples in [wiki](https://github.com/Canner/apollo-link-firebase/wiki/Advance-Query)
 ### Usage
