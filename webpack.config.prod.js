@@ -13,7 +13,9 @@ module.exports = {
     path: path.join(__dirname, 'lib'),
     filename: 'bundle.umd.js',
     library: "apollo-link-firebase",
-    libraryTarget: "umd"
+    libraryTarget: "umd",
+    // https://github.com/webpack/webpack/issues/6522
+    globalObject: 'typeof self !== \'undefined\' ? self : this'
   },
   resolve: {
     extensions: ['.js', '.ts', '.tsx']
