@@ -1,6 +1,6 @@
 <a href="https://www.canner.io"><img src="https://user-images.githubusercontent.com/26116324/37811194-a316caac-2e93-11e8-858b-eff589dcfdf3.png" /></a>
 
-[![npm version](https://badge.fury.io/js/apollo-link-firebase.svg)](https://badge.fury.io/js/apollo-link-firebase) [![CircleCI](https://circleci.com/gh/Canner/apollo-link-firebase.svg?style=shield)](https://circleci.com/gh/Canner/apollo-link-firebase)
+[![npm version](https://badge.fury.io/js/apollo-link-firebase.svg)](https://badge.fury.io/js/apollo-link-firebase) [![CircleCI](https://circleci.com/gh/Canner/apollo-link-firebase.svg?style=shield)](https://circleci.com/gh/Canner/apollo-link-firebase) [![gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/Canner/apollo-link-firebase)
 
 ## Apollo-link-firebase
 apollo-link-firebase provides you a simple way to query Firebase in graphQL with [Apollo-client](https://www.apollographql.com/client/) **without building a graphQL server**
@@ -276,6 +276,6 @@ Here's a simple [React + apollo-link-firebase todo app](https://github.com/Canne
 ## Contribution
 Contributions are **welcome and extremely helpful** 🙌
 
-Feel free to join [Canner Slack](https://cannerio.now.sh/)  `#apollo-firebase-link` channel to discuss with us!
+Feel free to join [our gitter channel](https://gitter.im/Canner/apollo-link-firebase) to discuss with us!
 
-[![](https://user-images.githubusercontent.com/26116324/37811196-a437d930-2e93-11e8-97d8-0653ace2a46d.png)](https://www.canner.io/)
+[![](https://user-images.githubusercontent.com/26116324/37811196-a437d930-2e93-11e8-97d8-0653ace2a46d.png)](https://www.canner.io/) [![Join the chat at https://gitter.im/Canner/apollo-link-firebase](https://badges.gitter.im/Canner/apollo-link-firebase.svg)](https://gitter.im/Canner/apollo-link-firebase?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
