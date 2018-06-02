@@ -278,4 +278,4 @@ Contributions are **welcome and extremely helpful** 🙌
 
 Feel free to join [our gitter channel](https://gitter.im/Canner/apollo-link-firebase) to discuss with us!
 
-[![](https://user-images.githubusercontent.com/26116324/37811196-a437d930-2e93-11e8-97d8-0653ace2a46d.png)](https://www.canner.io/)
+[![](https://user-images.githubusercontent.com/26116324/37811196-a437d930-2e93-11e8-97d8-0653ace2a46d.png)](https://www.canner.io/) [![Join the chat at https://gitter.im/Canner/apollo-link-firebase](https://badges.gitter.im/Canner/apollo-link-firebase.svg)](https://gitter.im/Canner/apollo-link-firebase?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
