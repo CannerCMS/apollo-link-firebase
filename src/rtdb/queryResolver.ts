@@ -35,7 +35,9 @@ const queryResolver: Resolver = async (
 
     // typename
     if (resultKey === '__typename') {
-      return root.__typename || null;
+      return has(directives, 'type')
+      ? directives.type.name
+      : root.__typename || null;
     }
 
     // dealing with different directives
@@ -80,14 +82,19 @@ const queryResolver: Resolver = async (
   // if it's nested selectionSet, we return the child
   if (!isLeaf && !has(directives, 'rtdbQuery') && !rootSnapshot) {
     return (has(directives, 'array'))
-      ? snapshotToArray(currentSnapshot.child(resultKey), null)
-      : {
-        __snapshot: currentSnapshot.child(resultKey)
-      };
+      ? snapshotToArray(currentSnapshot.child(resultKey), has(directives, 'type') ? directives.type.name : null)
+      : has(directives, 'type')
+        ? {
+            __snapshot: currentSnapshot.child(resultKey),
+            __typename: directives.type.name
+          }
+        : {
+            __snapshot: currentSnapshot.child(resultKey)
+          };
   }
 
   // type could be defined in different directives, @rtdbQuery, @rtdbSub...
-  const type = context.findType(directives);
+  const type = has(directives, 'type') ? directives.type.name : context.findType(directives);
 
   // firebase treat all data as object, even array
   // so we need a hint using @array to know when to parse object to array

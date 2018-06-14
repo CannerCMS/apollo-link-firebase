@@ -29,7 +29,9 @@ const resolver: Resolver = async (
 
   // __typename
   if (isLeaf && resultKey === '__typename') {
-    return root.__typename || null;
+    return has(directives, 'type')
+      ? directives.type.name
+      : root.__typename || null;
   }
 
   // @rtdbUpdate, @rtdbSet, we simply return the input to make apollo cache work
@@ -40,18 +42,20 @@ const resolver: Resolver = async (
   // By convention GraphQL recommends mutations having a single argument named 'input'
   // https://dev-blog.apollodata.com/designing-graphql-mutations-e09de826ed97
   const payload: any = args && args.input;
-
   // deal with @rtdbUpdate, @rtdbSet, @rtdbRemove
+  const typeTagName: string = has(directives, 'type') 
+    ? directives.type.name
+    : null  
   if (has(directives, 'rtdbUpdate')) {
     const {ref, type} = directives.rtdbUpdate;
     context.mutationRef = ref;
     await database.ref(ref).update(payload);
-    return {payload, __typename: type};
+    return {payload, __typename: typeTagName || type};
   } else if (has(directives, 'rtdbSet')) {
     const {ref, type} = directives.rtdbSet;
     context.mutationRef = ref;
     await database.ref(ref).set(payload);
-    return {payload, __typename: type};
+    return {payload, __typename: typeTagName || type};
   } else if (has(directives, 'rtdbRemove')) {
     const {ref} = directives.rtdbRemove;
     context.mutationRef = ref;
@@ -65,7 +69,12 @@ const resolver: Resolver = async (
     return {
       payload,
       __pushKey: newRef.key,
-      __typename: type
+      __typename: typeTagName || type
+    };
+  } else if (!isLeaf && root && has(root, 'payload') && has(directives, 'type')) {
+    return {
+      payload: (root.payload && root.payload[resultKey]) || null,
+      __typename: directives.type.name
     };
   }
 

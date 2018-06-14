@@ -466,6 +466,39 @@ describe('rtdbLink', () => {
         name: authors[1].name
       });
     });
+    it('should respect the type directive for nested objects, arrays, queries', async () => {
+      const query = gql`
+        query($ref: string, $authorRef: string) {
+          articles @rtdbQuery(ref: $ref, type: "OverridenArticleType") @type(name:"Article") @array {
+            id @key
+            nested @type(name:"NestedType"){
+              nestedField
+            }
+            authors @array @type(name:"Author"){
+              id @key @export
+              info @rtdbQuery(ref: $authorRef, type: "OverridenAuthorInfoType") @type(name:"AuthorInfo") {
+                name
+              }
+            }
+          }
+        }
+      `;
+
+      const {data} = await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query,
+          variables: {
+            ref: `${TEST_NAMESPACE}/articles`,
+            authorRef: ({exportVal}) => `${TEST_NAMESPACE}/authors/${exportVal.id}`
+          }
+        }),
+      );
+      expect(data.articles[0]['__typename']).to.be.eql('Article');
+      expect(data.articles[0]['nested']['__typename']).to.be.eql('NestedType');
+      expect(data.articles[0].authors[0]['__typename']).to.be.eql('Author');
+      expect(data.articles[0].authors[0]['info']['__typename']).to.be.eql('AuthorInfo');      
+    });
   });
 
   describe('mutation', () => {
@@ -707,7 +740,7 @@ describe('rtdbLink', () => {
         }
 
         mutation($ref: string, $input: ProfileInput!) {
-          pushdata(input: $input) @rtdbPush(ref: $ref) {
+          pushdata(input: $input) @rtdbPush(ref: $ref) @type(name:"TypeTag") {
             id @pushKey
             string
             number
@@ -733,6 +766,7 @@ describe('rtdbLink', () => {
       expect(pushdata).to.have.property('id');
       expect(pushdata.string).to.be.equal('wwwy3y3');
       expect(pushdata.number).to.be.equal(1);
+      expect(pushdata.__typename).to.be.equal('TypeTag');
       expect(pushdata.field).to.be.null;
 
       // read data
@@ -767,8 +801,8 @@ describe('rtdbLink', () => {
     it('should subscribe using value event', done => {
       const subQuery = gql`
         subscription($ref: string) {
-          value @rtdbSub(ref: $ref, event: "value") {
-            field {
+          value @rtdbSub(ref: $ref, event: "value") @type(name:"TypeTag") {
+            field @type(name:"NestedTypeTag"){
               nestedField
             }
           }
@@ -786,6 +820,8 @@ describe('rtdbLink', () => {
         callback();
         expect(callback.calledOnce).to.be.true;
         expect(data.value.field.nestedField).to.be.equal('wwwy3y3');
+        expect(data.value.__typename).to.be.equal('TypeTag');
+        expect(data.value.field.__typename).to.be.equal('NestedTypeTag');
         subscription.unsubscribe();
         done();
       });
@@ -822,7 +858,7 @@ describe('rtdbLink', () => {
     it('should subscribe using child_added', done => {
       const subQuery = gql`
         subscription($ref: string) {
-          newArticle @rtdbSub(ref: $ref, event: "child_added") {
+          newArticle @rtdbSub(ref: $ref, event: "child_added") @type(name:"TypeTag") {
             id @key
             string
           }
@@ -842,6 +878,7 @@ describe('rtdbLink', () => {
         expect(callback.calledOnce).to.be.true;
         expect(data.newArticle).to.have.property('id');
         expect(data.newArticle.string).to.be.equal('wwwy3y3');
+        expect(data.newArticle.__typename).to.be.equal('TypeTag');
         subscription.unsubscribe();
         done();
       });
@@ -877,7 +914,7 @@ describe('rtdbLink', () => {
     it('should subscribe using child_changed', done => {
       const subQuery = gql`
         subscription($ref: string) {
-          subscribeUpdate @rtdbSub(ref: $ref, event: "child_changed") {
+          subscribeUpdate @rtdbSub(ref: $ref, event: "child_changed") @type(name:"TypeTag") {
             id @key
             string
           }
@@ -896,6 +933,7 @@ describe('rtdbLink', () => {
         expect(callback.calledOnce).to.be.true;
         expect(data.subscribeUpdate.id).to.be.equal(idAdded);
         expect(data.subscribeUpdate.string).to.be.equal('wwwy3y32');
+        expect(data.subscribeUpdate.__typename).to.be.equal('TypeTag');
         subscription.unsubscribe();
         done();
       });
@@ -928,7 +966,7 @@ describe('rtdbLink', () => {
     it('should subscribe using child_removed', done => {
       const subQuery = gql`
         subscription($ref: string) {
-          subscribeRemoved @rtdbSub(ref: $ref, event: "child_removed") {
+          subscribeRemoved @rtdbSub(ref: $ref, event: "child_removed") @type(name:"TypeTag") {
             id @key
           }
         }
@@ -945,6 +983,7 @@ describe('rtdbLink', () => {
         callback();
         expect(callback.calledOnce).to.be.true;
         expect(data.subscribeRemoved.id).to.be.equal(idAdded);
+        expect(data.subscribeRemoved.__typename).to.be.equal('TypeTag');
         subscription.unsubscribe();
         done();
       });
