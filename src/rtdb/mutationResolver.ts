@@ -13,6 +13,7 @@ const resolver: Resolver = async (
 ) => {
   const { resultKey, directives, isLeaf } = info;
   const { database } = context;
+  const hasTypeDirective = has(directives, 'type');
 
   // used when rtdbPush need to know the generated pushKey
   // also fields return in @rtdbPush payload
@@ -29,7 +30,7 @@ const resolver: Resolver = async (
 
   // __typename
   if (isLeaf && resultKey === '__typename') {
-    return has(directives, 'type')
+    return hasTypeDirective
       ? directives.type.name
       : root.__typename || null;
   }
@@ -43,9 +44,9 @@ const resolver: Resolver = async (
   // https://dev-blog.apollodata.com/designing-graphql-mutations-e09de826ed97
   const payload: any = args && args.input;
   // deal with @rtdbUpdate, @rtdbSet, @rtdbRemove
-  const typeTagName: string = has(directives, 'type') 
+  const typeTagName: string = hasTypeDirective
     ? directives.type.name
-    : null  
+    : null;
   if (has(directives, 'rtdbUpdate')) {
     const {ref, type} = directives.rtdbUpdate;
     context.mutationRef = ref;
@@ -71,7 +72,8 @@ const resolver: Resolver = async (
       __pushKey: newRef.key,
       __typename: typeTagName || type
     };
-  } else if (!isLeaf && root && has(root, 'payload') && has(directives, 'type')) {
+  } else if (!isLeaf && root && has(root, 'payload') && hasTypeDirective) {
+    // if it's a selectionSet with payload and @type
     return {
       payload: (root.payload && root.payload[resultKey]) || null,
       __typename: directives.type.name

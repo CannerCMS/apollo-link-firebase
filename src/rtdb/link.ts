@@ -1,11 +1,10 @@
 import { OperationTypeNode } from 'graphql';
-import { graphql, ExecInfo } from 'graphql-anywhere/lib/async';
+import { graphql } from 'graphql-anywhere/lib/async';
 import { ApolloLink, Observable, FetchResult, Operation, NextLink } from 'apollo-link';
-import { hasDirectives, addTypenameToDocument, getMainDefinition, getFragmentDefinitions } from 'apollo-utilities';
+import { hasDirectives, addTypenameToDocument, getMainDefinition } from 'apollo-utilities';
 import { database as firebaseDatabase } from 'firebase';
 import { Resolver } from 'graphql-anywhere';
 import { ResolverContext } from './types';
-import { createQuery } from './utils';
 
 // resolvers
 import queryResolver from './queryResolver';

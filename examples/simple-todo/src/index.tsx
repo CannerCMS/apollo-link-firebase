@@ -45,7 +45,7 @@ class Example extends Component<{}, State> {
         Apollo-link-firebase Simple Todo Example
       </Header>
       <Content style={{padding: '0 50px'}}>
-        <div style={{background: '#fff', padding: 24, minHeight: '100%'}}>
+        <div style={{background: '#fff', padding: 24, minHeight: 280}}>
         {
           (this.state.user) ?
             <Row>

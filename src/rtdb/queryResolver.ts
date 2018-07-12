@@ -27,6 +27,7 @@ const queryResolver: Resolver = async (
   const { directives, isLeaf, resultKey } = info;
   const { database, exportVal } = context;
   const {rootSnapshot} = root;
+  const hasTypeDirective = has(directives, 'type');
   let currentSnapshot = root.__snapshot;
 
   if (isLeaf) {
@@ -35,9 +36,9 @@ const queryResolver: Resolver = async (
 
     // typename
     if (resultKey === '__typename') {
-      return has(directives, 'type')
-      ? directives.type.name
-      : root.__typename || null;
+      return hasTypeDirective
+        ? directives.type.name
+        : root.__typename || null;
     }
 
     // dealing with different directives
@@ -81,28 +82,26 @@ const queryResolver: Resolver = async (
 
   // if it's nested selectionSet, we return the child
   if (!isLeaf && !has(directives, 'rtdbQuery') && !rootSnapshot) {
+    // tslint:disable-next-line:no-shadowed-variable
+    const typename = hasTypeDirective ? directives.type.name : null;
     return (has(directives, 'array'))
-      ? snapshotToArray(currentSnapshot.child(resultKey), has(directives, 'type') ? directives.type.name : null)
-      : has(directives, 'type')
-        ? {
-            __snapshot: currentSnapshot.child(resultKey),
-            __typename: directives.type.name
-          }
-        : {
-            __snapshot: currentSnapshot.child(resultKey)
-          };
+      ? snapshotToArray(currentSnapshot.child(resultKey), typename)
+      : {
+        __snapshot: currentSnapshot.child(resultKey),
+        __typename: typename
+      };
   }
 
   // type could be defined in different directives, @rtdbQuery, @rtdbSub...
-  const type = has(directives, 'type') ? directives.type.name : context.findType(directives);
+  const typename = hasTypeDirective ? directives.type.name : context.findType(directives);
 
   // firebase treat all data as object, even array
   // so we need a hint using @array to know when to parse object to array
   return (has(directives, 'array'))
-    ? snapshotToArray(currentSnapshot, type)
+    ? snapshotToArray(currentSnapshot, typename)
     : {
       __snapshot: currentSnapshot,
-      __typename: type
+      __typename: typename
     };
 };
 

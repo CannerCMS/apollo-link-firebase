@@ -517,10 +517,10 @@ describe('rtdbLink', () => {
           }
         }),
       );
-      expect(data.articles[0]['__typename']).to.be.eql('Article');
-      expect(data.articles[0]['nested']['__typename']).to.be.eql('NestedType');
-      expect(data.articles[0].authors[0]['__typename']).to.be.eql('Author');
-      expect(data.articles[0].authors[0]['info']['__typename']).to.be.eql('AuthorInfo');      
+      expect(data.articles[0].__typename).to.be.eql('Article');
+      expect(data.articles[0].nested.__typename).to.be.eql('NestedType');
+      expect(data.articles[0].authors[0].__typename).to.be.eql('Author');
+      expect(data.articles[0].authors[0].info.__typename).to.be.eql('AuthorInfo');
     });
   });
 

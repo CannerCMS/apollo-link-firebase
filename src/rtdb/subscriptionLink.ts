@@ -1,4 +1,4 @@
-import { OperationTypeNode, FieldNode } from 'graphql';
+import { FieldNode } from 'graphql';
 import { ApolloLink, Observable, FetchResult, Operation, NextLink } from 'apollo-link';
 import {
   hasDirectives, addTypenameToDocument, getMainDefinition, getFragmentDefinitions, getDirectiveInfoFromField
@@ -36,7 +36,7 @@ export default class RtdbSubLink extends ApolloLink {
     };
 
     // Subscription operations must have exactly one root field.
-    const onlyRootField: FieldNode = mainDefinition.selectionSet.selections[0];
+    const onlyRootField: FieldNode = mainDefinition.selectionSet.selections[0] as FieldNode;
 
     // get directives
     const directives = getDirectiveInfoFromField(onlyRootField, operation.variables);
