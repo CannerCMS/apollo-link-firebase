@@ -40,13 +40,17 @@ export const createQuery = ({
   // filter
   if (!isUndefined(directives.limitToFirst)) {
     query = query.limitToFirst(directives.limitToFirst);
-  } else if (!isUndefined(directives.limitToLast)) {
+  }
+  if (!isUndefined(directives.limitToLast)) {
     query = query.limitToLast(directives.limitToLast);
-  } else if (!isUndefined(directives.startAt)) {
+  }
+  if (!isUndefined(directives.startAt)) {
     query = query.startAt(directives.startAt);
-  } else if (!isUndefined(directives.endAt)) {
+  }
+  if (!isUndefined(directives.endAt)) {
     query = query.endAt(directives.endAt);
-  } else if (!isUndefined(directives.equalTo)) {
+  }
+  if (!isUndefined(directives.equalTo)) {
     query = query.equalTo(directives.equalTo);
   }
   return query;
