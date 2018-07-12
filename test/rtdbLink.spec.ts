@@ -267,6 +267,29 @@ describe('rtdbLink', () => {
       expect(data.articles.length).to.be.equal(2);
     });
 
+    it('should query array with startAt & limitToFirst', async () => {
+      const query = gql`
+        query($ref: string) {
+          articles @rtdbQuery(ref: $ref, orderByChild: "count", startAt: 2, limitToFirst: 2) @array {
+            id @key
+            count,
+            title
+          }
+        }
+      `;
+
+      const {data} = await makePromise<Result>(
+        execute(link, {
+          operationName: 'query',
+          query,
+          variables: {ref: `${TEST_NAMESPACE}/articles`}
+        }),
+      );
+      expect(data.articles[0].count < data.articles[1].count).to.be.true;
+      expect(data.articles.length).to.be.equal(2);
+      expect(data.articles[0].count).to.be.equal(2);
+    });
+
     it('should query nested array', async () => {
       const query = gql`
         query($ref: string) {
