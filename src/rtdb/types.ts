@@ -26,6 +26,7 @@ export interface MutationResolverRoot {
 export interface DirectiveArgs {
   ref: string;
   type: string;
+  name: string;
   orderByChild?: string;
   orderByKey?: boolean;
   orderByValue?: boolean;
