@@ -73,6 +73,6 @@
   "repository": "Canner/apollo-link-firebase",
   "license": "MIT",
   "dependencies": {
-    "firebase": "^4.11.0"
+    "firebase": "^5.10.0"
   }
 }
