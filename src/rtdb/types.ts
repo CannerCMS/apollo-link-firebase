@@ -37,5 +37,5 @@ export interface DirectiveArgs {
 }
 
 export interface SubDirectiveArgs extends DirectiveArgs {
-  event: string;
+  event: database.EventType;
 }

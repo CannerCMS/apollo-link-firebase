@@ -1,4 +1,4 @@
-import { ExecInfo } from 'graphql-anywhere/lib/async';
+import { ExecInfo } from 'graphql-anywhere';
 import { Resolver } from 'graphql-anywhere';
 import * as has from 'lodash/has';
 import * as last from 'lodash/last';

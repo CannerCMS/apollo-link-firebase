@@ -1,4 +1,4 @@
-import { ExecInfo } from 'graphql-anywhere/lib/async';
+import { ExecInfo } from 'graphql-anywhere';
 import { Resolver } from 'graphql-anywhere';
 import { database as firebaseDatabase } from 'firebase';
 import * as has from 'lodash/has';
@@ -73,6 +73,7 @@ const queryResolver: Resolver = async (
     // we fetch the new one and replace currentSnapshot
     const query = createQuery({
       database,
+      // @ts-ignore
       directives: directives.rtdbQuery,
       exportVal,
       snapshot: currentSnapshot
@@ -93,6 +94,7 @@ const queryResolver: Resolver = async (
   }
 
   // type could be defined in different directives, @rtdbQuery, @rtdbSub...
+  // @ts-ignore
   const typename = hasTypeDirective ? directives.type.name : context.findType(directives);
 
   // firebase treat all data as object, even array
