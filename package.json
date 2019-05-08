@@ -49,7 +49,6 @@
     "chai": "^4.1.2",
     "faker": "^4.1.0",
     "graphql": "0.13.0",
-    "graphql-anywhere": "^4.1.6",
     "graphql-tag": "^2.8.0",
     "graphql-tools": "^2.21.0",
     "lodash": "^4.17.5",
@@ -73,6 +72,7 @@
   "repository": "Canner/apollo-link-firebase",
   "license": "MIT",
   "dependencies": {
-    "firebase": "^4.11.0"
+    "firebase": "^4.11.0",
+    "graphql-anywhere": "^4.1.6"
   }
 }
